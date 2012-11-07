@@ -13,12 +13,24 @@ public class StackSteps extends Embedder{
  
     private Stack<String> testStack;
     private String searchElement;
- 
+    private App testApp;
+    private Boolean status;
+    
     @Given("an empty stack")
     public void anEmptyStack() {
         testStack = new Stack<String>();
     }
  
+    @Given("an app")
+    public void anApp() {
+      testApp = new App();
+    }
+    
+    @When("calling example")
+    public void callingExample() {
+      status = testApp.example();
+    }
+    
     @When("the string $element is added")
     public void anElementIsAdded(String element) {
         testStack.push(element);
@@ -42,5 +54,10 @@ public class StackSteps extends Embedder{
     @Then("the position returned should be $pos")
     public void thePositionReturnedShouldBe(int pos) {
     	Assert.assertEquals(testStack.search(searchElement), pos);
+    }
+    
+    @Then("status should be $status")
+    public void statusShouldBeTrue(Boolean status) {
+      Assert.assertTrue(testApp.example());
     }
 }
