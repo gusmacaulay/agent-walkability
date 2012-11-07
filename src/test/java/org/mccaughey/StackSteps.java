@@ -58,6 +58,6 @@ public class StackSteps extends Embedder{
     
     @Then("status should be $status")
     public void statusShouldBeTrue(Boolean status) {
-      Assert.assertTrue(testApp.example());
+      Assert.assertTrue(this.status == status);
     }
 }
