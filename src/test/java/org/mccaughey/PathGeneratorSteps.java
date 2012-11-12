@@ -58,7 +58,9 @@ public class PathGeneratorSteps extends Embedder {
 
   @Then("the correct shortest path will be provided")
   public void shortestPathIsCorrect() {
-    Assert.assertTrue(path != null);
+    Assert.assertTrue(path.isValid());
+    System.out.println("EDGES: " + path.getEdges().size());
+    //Assert.assertTrue(path != null);
   }
 
 }

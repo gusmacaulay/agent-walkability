@@ -14,7 +14,6 @@ import org.jbehave.core.steps.InstanceStepsFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mccaughey.PathGeneratorSteps;
-import org.mccaughey.StackSteps;
 
 import de.codecentric.jbehave.junit.monitoring.JUnitReportingRunner;
 

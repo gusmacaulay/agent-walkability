@@ -31,7 +31,7 @@ public class PathGenerator {
     
     Graph graph = buildGraph(lines);
     Path shortest = findAStarShortestPath(graph, (Node) graph.getNodes()
-        .toArray()[1], (Node) graph.getNodes().toArray()[2]);
+        .toArray()[3], (Node) graph.getNodes().toArray()[6]);
     return shortest;
   }
 
