@@ -1,5 +1,5 @@
 *.class
-
+non-free-data
 # Package Files #
 *.jar
 *.war

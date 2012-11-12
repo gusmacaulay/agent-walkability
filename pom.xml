@@ -23,8 +23,16 @@
 	</developers>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<geotools.version>8.3</geotools.version>
 	</properties>
 
+	<repositories>
+	<repository>
+			<id>osgeo</id>
+			<name>Open Source Geospatial Foundation Repository</name>
+			<url>http://download.osgeo.org/webdav/geotools/</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.jbehave</groupId>
@@ -41,77 +49,29 @@
 			<artifactId>jbehave-junit-runner</artifactId>
 			<version>1.0.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-graph</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-main</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-shapefile</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
 	</dependencies>
+
 
 	<build>
 		<plugins>
-<!-- 			<plugin> -->
-<!-- 				<groupId>org.jbehave</groupId> -->
-<!-- 				<artifactId>jbehave-maven-plugin</artifactId> -->
-<!-- 				<version>3.1.2</version> -->
-<!-- 				<executions> -->
-<!-- 					<execution> -->
-<!-- 						<id>run-stories-as-embeddables</id> -->
-<!-- 						<phase>test</phase> -->
-<!-- 						<configuration> -->
-<!-- 							<includes> -->
-<!-- 								<include>**/*Scenarios.java</include> -->
-<!-- 							</includes> -->
-<!-- 							<ignoreFailureInStories>true</ignoreFailureInStories> -->
-<!-- 							<ignoreFailureInView>false</ignoreFailureInView> -->
-<!-- 						</configuration> -->
-<!-- 						<goals> -->
-<!-- 							<goal>run-stories-as-embeddables</goal> -->
-<!-- 						</goals> -->
-<!-- 					</execution> -->
-<!-- 				</executions> -->
-<!-- 			</plugin> -->
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<!-- <executions> -->
-				<!-- <execution> -->
-				<!-- <id>unpack-jbehave-site-resources</id> -->
-				<!-- <phase>generate-resources</phase> -->
-				<!-- <goals> -->
-				<!-- <goal>unpack</goal> -->
-				<!-- </goals> -->
-				<!-- <configuration> -->
-				<!-- <overwriteReleases>false</overwriteReleases> -->
-				<!-- <overwriteSnapshots>true</overwriteSnapshots> -->
-				<!-- <artifactItems> -->
-				<!-- <artifactItem> -->
-				<!-- <groupId>org.jbehave.site</groupId> -->
-				<!-- <artifactId>jbehave-site-resources</artifactId> -->
-				<!-- <version>3.1.1</version> -->
-				<!-- <type>zip</type> -->
-				<!-- <outputDirectory> ${project.build.directory}/jbehave/view</outputDirectory> -->
-				<!-- </artifactItem> -->
-				<!-- </artifactItems> -->
-				<!-- </configuration> -->
-				<!-- </execution> -->
-				<!-- <execution> -->
-				<!-- <id>unpack-jbehave-reports-resources</id> -->
-				<!-- <phase>generate-resources</phase> -->
-				<!-- <goals> -->
-				<!-- <goal>unpack</goal> -->
-				<!-- </goals> -->
-				<!-- <configuration> -->
-				<!-- <overwriteReleases>false</overwriteReleases> -->
-				<!-- <overwriteSnapshots>true</overwriteSnapshots> -->
-				<!-- <artifactItems> -->
-				<!-- <artifactItem> -->
-				<!-- <groupId>org.jbehave</groupId> -->
-				<!-- <artifactId>jbehave-core</artifactId> -->
-				<!-- <version>3.1.2</version> -->
-				<!-- <outputDirectory>${project.build.directory}/jbehave/view</outputDirectory> -->
-				<!-- <includes>**\/*.css,**\/*.ftl,**\/*.js</includes> -->
-				<!-- </artifactItem> -->
-				<!-- </artifactItems> -->
-				<!-- </configuration> -->
-				<!-- </execution> -->
-				<!-- </executions> -->
 			</plugin>
 		</plugins>
 	</build>
