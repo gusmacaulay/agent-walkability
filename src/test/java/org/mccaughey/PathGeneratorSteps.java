@@ -60,8 +60,8 @@ public class PathGeneratorSteps extends Embedder {
 
   @Given("an endpoint")
   public void anEndPoint() {
-    double easting = 286144;
-    double northing = 5821117;
+    double easting = 286074.21;
+    double northing = 5821166.81;
     end = geometryFactory.createPoint(new Coordinate(easting, northing));
 
   }
