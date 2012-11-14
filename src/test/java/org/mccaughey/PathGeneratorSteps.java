@@ -75,6 +75,10 @@ public class PathGeneratorSteps extends Embedder {
   @Then("the correct shortest path will be provided")
   public void shortestPathIsCorrect() {
     Assert.assertTrue(path.isValid());
+  }
+  
+  @Then("the path will have timestamps")
+  public void shortestPathHasTimeStamps() {
     System.out.println("EDGES: " + path.getEdges().size());
     for (Edge edge : (List<Edge>) path.getEdges()) {
       LineString line = (LineString) edge.getObject();

@@ -10,3 +10,4 @@ Given a startpoint
 Given an endpoint
 When the path generator is asked for a shortest path
 Then the correct shortest path will be provided
+Then the path will have timestamps

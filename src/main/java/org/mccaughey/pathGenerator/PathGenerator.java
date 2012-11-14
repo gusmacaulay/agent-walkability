@@ -28,6 +28,7 @@ import org.geotools.graph.traverse.standard.AStarIterator.AStarNode;
 import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.strtree.STRtree;
@@ -65,9 +67,10 @@ public class PathGenerator {
     LOGGER.info("End Node: " + endNode.toString());
     Graph graph = lineStringGen.getGraph();
     LOGGER.info("GRAPH: " + graph);
-    
+
     Path shortest = findAStarShortestPath(graph, startNode, endNode);
-    writePathFromEdges(shortest.getEdges(),networkSource.getSchema());
+    writePathFromEdges(shortest.getEdges(), networkSource.getSchema());
+    writePathAsNodes(shortest.getEdges(), networkSource.getSchema().getCoordinateReferenceSystem());
     return shortest;
   }
 
@@ -185,7 +188,7 @@ public class PathGenerator {
       }
     }
   }
-  
+
   private static void writePathFromEdges(List<Edge> edges,
       SimpleFeatureType featureType) {
     List<SimpleFeature> featuresList = new ArrayList();
@@ -194,9 +197,45 @@ public class PathGenerator {
           (Geometry) edge.getObject());
       featuresList.add(feature);
     }
-    LOGGER.info("Writing to file?");
     File file = new File("path.json");
     writeFeatures(DataUtilities.collection(featuresList), file);
+  }
+
+  private static void writePathAsNodes(List<Edge> edges,
+      CoordinateReferenceSystem crs) {
+    SimpleFeatureType featureType = createPathFeatureType(crs);
+    GeometryFactory geometryFactory = new GeometryFactory(precision);
+    List<SimpleFeature> featuresList = new ArrayList();
+    for (Edge edge : edges) {
+      LineString line = (LineString) edge.getObject();
+      for (Coordinate coordinate : line.getCoordinates()) {
+        Point point = geometryFactory.createPoint(coordinate);
+        SimpleFeature feature = buildFeatureFromGeometry(featureType, point);
+        featuresList.add(feature);
+      }
+    }
+
+    File file = new File("path_nodes.json");
+    writeFeatures(DataUtilities.collection(featuresList), file);
+  }
+
+  private static SimpleFeatureType createPathFeatureType(
+      CoordinateReferenceSystem crs) {
+
+    SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
+    builder.setName("Buffer");
+    if (crs != null) {
+      builder.setCRS(crs); // <- Coordinate reference system
+    }
+
+    // add attributes in order
+    builder.add("geometry", Point.class);
+    builder.add("when", String.class);
+
+    // build the type
+    SimpleFeatureType pathType = builder.buildFeatureType();
+
+    return pathType;
   }
 
   private static void writeNetworkFromEdges(HashSet<Edge> edges,
@@ -207,8 +246,7 @@ public class PathGenerator {
           (Geometry) edge.getObject());
       featuresList.add(feature);
     }
-    LOGGER.info("Writing to file?");
-    File file = new File("path.json");
+    File file = new File("graph.json");
     writeFeatures(DataUtilities.collection(featuresList), file);
   }
 
