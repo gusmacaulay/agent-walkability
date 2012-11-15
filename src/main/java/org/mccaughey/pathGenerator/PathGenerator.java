@@ -16,7 +16,6 @@ import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geojson.feature.FeatureJSON;
-import org.geotools.graph.build.feature.FeatureGraphGenerator;
 import org.geotools.graph.build.line.LineStringGraphGenerator;
 import org.geotools.graph.path.AStarShortestPathFinder;
 import org.geotools.graph.path.Path;
@@ -25,7 +24,6 @@ import org.geotools.graph.structure.Graph;
 import org.geotools.graph.structure.Node;
 import org.geotools.graph.traverse.standard.AStarIterator.AStarFunctions;
 import org.geotools.graph.traverse.standard.AStarIterator.AStarNode;
-import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -38,7 +36,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.strtree.STRtree;
@@ -70,6 +67,8 @@ public class PathGenerator {
 
     Path shortest = findAStarShortestPath(graph, startNode, endNode);
     writePathFromEdges(shortest.getEdges(), networkSource.getSchema());
+    CoordinateReferenceSystem crs = new CoordinateReferenceSystem();
+    
     writePathAsNodes(shortest.getEdges(), networkSource.getSchema().getCoordinateReferenceSystem());
     return shortest;
   }
@@ -111,9 +110,6 @@ public class PathGenerator {
     LineString originalLine = (LineString) connectedLine.extractLine(
         connectedLine.getStartIndex(), connectedLine.getEndIndex());
 
-    // GeometryFactory geometryFactory = new GeometryFactory(new
-    // PrecisionModel(),
-    // 28355);
     GeometryFactory geometryFactory = new GeometryFactory(precision);
     LineString newConnectingLine = geometryFactory
         .createLineString(new Coordinate[] { pt, minDistPoint });
@@ -121,9 +117,7 @@ public class PathGenerator {
     // lineStringGen.add(newConnectingLine);
     lines.add(newConnectingLine);
     if (!((lineB.getLength() == 0.0) || (lineA.getLength() == 0.0))) {
-      LOGGER.info("LINES COUNT: " + lines.size());
       removeLine(lines, originalLine);
-      LOGGER.info("LINES COUNT: " + lines.size());
 
       lineA = geometryFactory.createLineString(lineA.getCoordinates());
       lineB = geometryFactory.createLineString(lineB.getCoordinates());
@@ -206,11 +200,13 @@ public class PathGenerator {
     SimpleFeatureType featureType = createPathFeatureType(crs);
     GeometryFactory geometryFactory = new GeometryFactory(precision);
     List<SimpleFeature> featuresList = new ArrayList();
+    int unix_time = (int)(System.currentTimeMillis() / 1000L);
     for (Edge edge : edges) {
       LineString line = (LineString) edge.getObject();
       for (Coordinate coordinate : line.getCoordinates()) {
         Point point = geometryFactory.createPoint(coordinate);
-        SimpleFeature feature = buildFeatureFromGeometry(featureType, point);
+        SimpleFeature feature = buildTimeFeatureFromGeometry(featureType,point,unix_time);
+        unix_time+=10;
         featuresList.add(feature);
       }
     }
@@ -219,6 +215,16 @@ public class PathGenerator {
     writeFeatures(DataUtilities.collection(featuresList), file);
   }
 
+  private static SimpleFeature buildTimeFeatureFromGeometry(
+      SimpleFeatureType featureType, Geometry geom, int unix_time) {
+    SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
+    stb.init(featureType);
+    SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(featureType);
+    sfb.add(geom);
+    sfb.add(unix_time);
+    return sfb.buildFeature(null);
+  }
+  
   private static SimpleFeatureType createPathFeatureType(
       CoordinateReferenceSystem crs) {
 
@@ -241,6 +247,8 @@ public class PathGenerator {
   private static void writeNetworkFromEdges(HashSet<Edge> edges,
       SimpleFeatureType featureType) {
     List<SimpleFeature> featuresList = new ArrayList();
+   
+   
     for (Edge edge : edges) {
       SimpleFeature feature = buildFeatureFromGeometry(featureType,
           (Geometry) edge.getObject());
@@ -250,6 +258,8 @@ public class PathGenerator {
     writeFeatures(DataUtilities.collection(featuresList), file);
   }
 
+
+  
   private static SimpleFeature buildFeatureFromGeometry(
       SimpleFeatureType featureType, Geometry geom) {
     SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
