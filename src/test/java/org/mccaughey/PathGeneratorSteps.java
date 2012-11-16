@@ -65,19 +65,27 @@ public class PathGeneratorSteps extends Embedder {
     end = geometryFactory.createPoint(new Coordinate(easting, northing));
 
   }
+  
+  @Given("a set of endpoints")
+  public void aSetOfEndPoints() {
+    double easting = 286074.21;
+    double northing = 5821166.81;
+    end = geometryFactory.createPoint(new Coordinate(easting, northing));
 
-  @When("the path generator is asked for a shortest path")
+  }
+
+  @When("the path generator is asked for the shortest path/s")
   public void requestShortestPath() throws Exception {
     path = pathGenerator.shortestPath(networkSource, start, end);
     // Assert.assertTrue(true);
   }
 
-  @Then("the correct shortest path will be provided")
+  @Then("the correct shortest path/s will be provided")
   public void shortestPathIsCorrect() {
     Assert.assertTrue(path.isValid());
   }
   
-  @Then("the path will have timestamps")
+  @Then("the path/s will have timestamps")
   public void shortestPathHasTimeStamps() {
     System.out.println("EDGES: " + path.getEdges().size());
     for (Edge edge : (List<Edge>) path.getEdges()) {

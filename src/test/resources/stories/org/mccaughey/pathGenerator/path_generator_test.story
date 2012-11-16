@@ -8,9 +8,9 @@ Given a path generator
 Given a footpath network
 Given a startpoint
 Given an endpoint
-When the path generator is asked for a shortest path
-Then the correct shortest path will be provided
-Then the path will have timestamps
+When the path generator is asked for the shortest path/s
+Then the correct shortest path/s will be provided
+Then the path/s will have timestamps
 
 Scenario: Walking speed parameters
 
@@ -23,3 +23,10 @@ Scenario: Counting intersections crossed
 Scenario: Validating inputs
 
 Scenario: Multiple agents and destinations
+Given a path generator
+Given a footpath network
+Given a startpoint
+Given a set of endpoints
+When the path generator is asked for the shortest path/s
+Then the correct shortest path/s will be provided
+Then the path/s will have timestamps
