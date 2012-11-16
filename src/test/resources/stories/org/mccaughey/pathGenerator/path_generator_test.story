@@ -12,6 +12,8 @@ When the path generator is asked for a shortest path
 Then the correct shortest path will be provided
 Then the path will have timestamps
 
+Scenario: Walking speed parameters
+
 Scenario: Traffic Lights and delays
 
 Scenario: Time Limit
@@ -19,3 +21,5 @@ Scenario: Time Limit
 Scenario: Counting intersections crossed
 
 Scenario: Validating inputs
+
+Scenario: Multiple agents and destinations
