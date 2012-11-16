@@ -30,6 +30,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vividsolutions.jts.densify.Densifier;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -67,8 +68,8 @@ public class PathGenerator {
 
     Path shortest = findAStarShortestPath(graph, startNode, endNode);
     writePathFromEdges(shortest.getEdges(), networkSource.getSchema());
-    CoordinateReferenceSystem crs = new CoordinateReferenceSystem();
-    
+   //sl CoordinateReferenceSystem crs = new CoordinateReferenceSystem();
+    //LOGGER.info("NETWORK CRS: {}", networkSource.getSchema().getCoordinateReferenceSystem());
     writePathAsNodes(shortest.getEdges(), networkSource.getSchema().getCoordinateReferenceSystem());
     return shortest;
   }
@@ -198,15 +199,18 @@ public class PathGenerator {
   private static void writePathAsNodes(List<Edge> edges,
       CoordinateReferenceSystem crs) {
     SimpleFeatureType featureType = createPathFeatureType(crs);
+   // LOGGER.info("Using Feature Type with CRS: {}", featureType.getCoordinateReferenceSystem());
     GeometryFactory geometryFactory = new GeometryFactory(precision);
     List<SimpleFeature> featuresList = new ArrayList();
-    int unix_time = (int)(System.currentTimeMillis() / 1000L);
+   // long unix_time = (long)(System.currentTimeMillis());
+    long unix_time = 0; //The epoch
     for (Edge edge : edges) {
       LineString line = (LineString) edge.getObject();
+      line = (LineString) Densifier.densify(line,1.0);
       for (Coordinate coordinate : line.getCoordinates()) {
         Point point = geometryFactory.createPoint(coordinate);
         SimpleFeature feature = buildTimeFeatureFromGeometry(featureType,point,unix_time);
-        unix_time+=10;
+        unix_time+=1000;//1 second
         featuresList.add(feature);
       }
     }
@@ -216,7 +220,7 @@ public class PathGenerator {
   }
 
   private static SimpleFeature buildTimeFeatureFromGeometry(
-      SimpleFeatureType featureType, Geometry geom, int unix_time) {
+      SimpleFeatureType featureType, Geometry geom, long unix_time) {
     SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
     stb.init(featureType);
     SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(featureType);
@@ -276,8 +280,10 @@ public class PathGenerator {
       os = new FileOutputStream(file);
       try {
         if (features.getSchema().getCoordinateReferenceSystem() != null) {
+          LOGGER.info("Encoding CRS?");
           fjson.setEncodeFeatureCollectionBounds(true);
           fjson.setEncodeFeatureCollectionCRS(true);
+          //fjson.writeCRS(features.getSchema().getCoordinateReferenceSystem(), os);
         } else {
           LOGGER.info("CRS is null");
         }

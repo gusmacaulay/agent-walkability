@@ -3,8 +3,8 @@ var animationTimer;
 var currentDate;
 // var startDate = new Date(1272736800000); // lower bound of when values
 // var endDate = new Date(1272737100000); // upper value of when values
-var startDate = new Date(1352937780000); // lower bound of when values
-var endDate = new Date(1352937860000); // upper value of when values
+var startDate = new Date(0); // lower bound of when values
+var endDate = new Date(240000); // upper value of when values
 var step = 8; // sencods to advance each interval
 var interval = 0.125; // seconds between each step in the animation
 
@@ -18,7 +18,8 @@ function startAnimation() {
     var spanEl = document.getElementById("span");
     var next = function() {
     //	alert("working! current date " + currentDate + " end date " + endDate );
-    	var span = parseInt(spanEl.value, 10);
+    	//var span = parseInt(spanEl.value, 10);
+    	var span = 1;
         if (currentDate < endDate) {
             filter.lowerBoundary = currentDate;
             filter.upperBoundary = new Date(currentDate.getTime() + (span * 1000));
@@ -66,7 +67,7 @@ projection: geographic,
 strategies: [new OpenLayers.Strategy.Fixed(), filterStrategy],
 //strategies: [new OpenLayers.Strategy.BBOX()],
 protocol: new OpenLayers.Protocol.HTTP({
-  url: "paths_wgs84.json",
+  url: "paths_wgs84.geojson",
   format: new OpenLayers.Format.GeoJSON()
 }),
 styleMap: new OpenLayers.StyleMap({
