@@ -41,6 +41,7 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.TopologyException;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import com.vividsolutions.jts.linearref.LinearLocation;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
 
@@ -62,7 +63,7 @@ public class PathGenerator {
     LineStringGraphGenerator lineStringGen = createGraphWithAdditionalNodes(
         lines, start, destinations);
     Graph graph = lineStringGen.getGraph();
-    LOGGER.info("GRAPH: " + graph);
+    // LOGGER.info("GRAPH: " + graph);
     writeNetworkFromEdges(graph.getEdges(), networkSource.getSchema());
 
     Node startNode = lineStringGen.getNode(start.getCoordinate());
@@ -71,21 +72,21 @@ public class PathGenerator {
     for (Point end : destinations) {
 
       try {
-      Node endNode = lineStringGen.getNode(end.getCoordinate());
-      if (endNode != null) {
-        LOGGER.info("Start Node: " + startNode.toString());
-        LOGGER.info("End Node: " + endNode.toString());
+        Node endNode = lineStringGen.getNode(end.getCoordinate());
+        if (endNode != null) {
+          LOGGER.info("Start Node: " + startNode.toString());
+          LOGGER.info("End Node: " + endNode.toString());
 
-        Path shortest = findAStarShortestPath(graph, startNode, endNode);
-        paths.add(shortest);
+          Path shortest = findAStarShortestPath(graph, startNode, endNode);
+          paths.add(shortest);
 
-      }
-      } catch(Exception e) {
+        }
+      } catch (Exception e) {
         LOGGER.error("Something bad happened, ignoring");
       }
     }
 
-    writePathNodes(paths, networkSource.getSchema()
+    writePathNodes(paths, startNode, networkSource.getSchema()
         .getCoordinateReferenceSystem());
 
     return paths;
@@ -218,7 +219,7 @@ public class PathGenerator {
     writeFeatures(DataUtilities.collection(featuresList), file);
   }
 
-  private static void writePathNodes(List<Path> paths,
+  private static void writePathNodes(List<Path> paths, Node start,
       CoordinateReferenceSystem crs) {
     SimpleFeatureType featureType = createPathFeatureType(crs);
     // LOGGER.info("Using Feature Type with CRS: {}",
@@ -226,18 +227,102 @@ public class PathGenerator {
     GeometryFactory geometryFactory = new GeometryFactory(precision);
     List<SimpleFeature> featuresList = new ArrayList();
     // long unix_time = (long)(System.currentTimeMillis());
+    Point startPoint = (Point) (start.getObject());
+    int path_id = 0;
     for (Path path : paths) {
-      List<Edge> edges = path.getEdges();
+      path_id++;
+      // List<Edge> edges = path.getEdges();
+      Node currentNode = path.getFirst();
+      // if (pathStart.getID() == start.getID())
+      // LOGGER.info("****Start Node Correct!");
+      // else
+      // LOGGER.info("****Start Node NOT Correct");
+      // if (start.getObject()path.getFirst();
+      // List<Edge> edge = pathStart.getEdges();
+
       long unix_time = 0; // The epoch
-      for (Edge edge : edges) {
-        LineString line = (LineString) edge.getObject();
-        line = (LineString) Densifier.densify(line, 10.0);
-        for (Coordinate coordinate : line.getCoordinates()) {
-          Point point = geometryFactory.createPoint(coordinate);
-          SimpleFeature feature = buildTimeFeatureFromGeometry(featureType,
-              point, unix_time);
-          unix_time += 7000;// 7 seconds
-          featuresList.add(feature);
+
+      // List<LineString> lines = new ArrayList();
+      LineString line;
+
+      // List<Integer> visited = new ArrayList();
+      List<String> unvisited = new ArrayList();
+      for (Edge edge : (List<Edge>) path.getEdges()) {
+        unvisited.add(String.valueOf(edge.getID()));
+      }
+    //  LOGGER.info("PATH Vertices {}", path);
+    //  LOGGER.info("PATH Edges {}", path.getEdges());
+   //   LOGGER.info("Unvisited Edges {}", unvisited);
+      List<Edge> relevantEdges = path.getEdges();
+      int loopcount = 20;
+      while (unvisited.size() > 0) {
+      //  LOGGER.info("Unvisited Edges {}", unvisited);
+        // loopcount--;
+        if (currentNode.getEdges().size() > 0) {
+          // LOGGER.info("Current Edges {}", currentNode.getEdges());
+
+          // LOGGER.info("Current Node {}", currentNode.getID() );
+          // LOGGER.info("Visited {} Total {}",
+          // visited.size(),path.getEdges().size());
+          for (Edge edge : (List<Edge>) currentNode.getEdges()) {
+            // if
+            // ((!(visited.contains(edge.getID())))&&(relevantEdges.contains(edge)))
+            // {
+            // LOGGER.info("Inspecting Edge {}", edge.getID());
+            if (unvisited.contains(String.valueOf(edge.getID()))) {
+             // LOGGER.info("Processing Edge {}", edge.getID());
+              line = (LineString) edge.getObject();
+              // edge.getOtherNode(currentNode);
+              // Geometry grandMls = geometryFactory.buildGeometry(lines);
+              // Point mlsPt =
+              // geometryFactory.createPoint(grandMls.getCoordinate());
+              // MultiLineString nodedLines = (MultiLineString)
+              // grandMls.union(mlsPt);
+
+              Coordinate pt = ((Point) currentNode.getObject()).getCoordinate();
+
+              LengthIndexedLine lil = new LengthIndexedLine(line);
+
+              if (lil.project(pt) == lil.getStartIndex()) {// start coordinate
+                                                           // is at start of
+                                                           // line
+                // for (Coordinate coordinate : line.getCoordinates()) {
+                //LOGGER
+                for (int index = 0; index < lil.getEndIndex(); index++) {
+                  Coordinate coordinate = lil.extractPoint(index);
+                  Point point = geometryFactory.createPoint(coordinate);
+                  SimpleFeature feature = buildTimeFeatureFromGeometry(
+                      featureType, point, unix_time, String.valueOf(path_id));
+                  unix_time += 7000;// 7 seconds
+                  featuresList.add(feature);
+                }
+              } else if (lil.project(pt) == lil.getEndIndex()) { // start
+                                                                 // coordinate
+                                                                 // is at the
+                                                                 // end of the
+                                                                 // line
+   
+                for (int index = (int) lil.getEndIndex(); index >= 0; index--) {
+                  Coordinate coordinate = lil.extractPoint(index);
+                  Point point = geometryFactory.createPoint(coordinate);
+                  SimpleFeature feature = buildTimeFeatureFromGeometry(
+                      featureType, point, unix_time, String.valueOf(path_id));
+                  unix_time += 7000;// 7 seconds
+                  featuresList.add(feature);
+                }
+              } else {
+                LOGGER.error("Start coordinate did not match with Index!");
+              }
+
+              unvisited.remove(String.valueOf(edge.getID()));
+              // visited.add(edge.getID());
+              Node nextNode = edge.getOtherNode(currentNode);
+              if (nextNode != null)
+                currentNode = nextNode;
+              else
+                break;
+            }
+          }
         }
       }
     }
@@ -245,38 +330,15 @@ public class PathGenerator {
     writeFeatures(DataUtilities.collection(featuresList), file);
   }
 
-  private static void writePathAsNodes(List<Edge> edges,
-      CoordinateReferenceSystem crs) {
-    SimpleFeatureType featureType = createPathFeatureType(crs);
-    // LOGGER.info("Using Feature Type with CRS: {}",
-    // featureType.getCoordinateReferenceSystem());
-    GeometryFactory geometryFactory = new GeometryFactory(precision);
-    List<SimpleFeature> featuresList = new ArrayList();
-    // long unix_time = (long)(System.currentTimeMillis());
-    long unix_time = 0; // The epoch
-    for (Edge edge : edges) {
-      LineString line = (LineString) edge.getObject();
-      line = (LineString) Densifier.densify(line, 1.0);
-      for (Coordinate coordinate : line.getCoordinates()) {
-        Point point = geometryFactory.createPoint(coordinate);
-        SimpleFeature feature = buildTimeFeatureFromGeometry(featureType,
-            point, unix_time);
-        unix_time += 1000;// 1 second
-        featuresList.add(feature);
-      }
-    }
-
-    File file = new File("path_nodes.json");
-    writeFeatures(DataUtilities.collection(featuresList), file);
-  }
-
   private static SimpleFeature buildTimeFeatureFromGeometry(
-      SimpleFeatureType featureType, Geometry geom, long unix_time) {
+      SimpleFeatureType featureType, Geometry geom, long unix_time,
+      String path_id) {
     SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
     stb.init(featureType);
     SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(featureType);
     sfb.add(geom);
     sfb.add(unix_time);
+    sfb.add(path_id);
     return sfb.buildFeature(null);
   }
 
@@ -291,7 +353,8 @@ public class PathGenerator {
 
     // add attributes in order
     builder.add("geometry", Point.class);
-    builder.add("when", String.class);
+    builder.add("when", Integer.class);
+    builder.add("path_id", String.class);
 
     // build the type
     SimpleFeatureType pathType = builder.buildFeatureType();
@@ -403,6 +466,7 @@ public class PathGenerator {
       for (int i = 0, n = nodedLines.getNumGeometries(); i < n; i++) {
         Geometry g = nodedLines.getGeometryN(i);
         if (g instanceof LineString) {
+          g = (LineString) Densifier.densify(g, 10.0);
           lines.add((LineString) g);
         }
       }
@@ -448,8 +512,8 @@ public class PathGenerator {
       }
     };
 
-    AStarShortestPathFinder pf = new AStarShortestPathFinder(graph, start,
-        destination, asf);
+    AStarShortestPathFinder pf = new AStarShortestPathFinder(graph,
+        destination, start, asf);
     pf.calculate();
     pf.finish();
     return pf.getPath();

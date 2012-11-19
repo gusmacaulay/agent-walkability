@@ -90,6 +90,7 @@ public class PathGeneratorSteps extends Embedder {
       SimpleFeature feature = features.next();
       destinations.add((Point) feature.getDefaultGeometry());
     }
+//    anEndPoint();
   }
 
   @When("the path generator is asked for the shortest path/s")
@@ -111,7 +112,7 @@ public class PathGeneratorSteps extends Embedder {
     for (Path path : paths) {
       for (Edge edge : (List<Edge>) path.getEdges()) {
         LineString line = (LineString) edge.getObject();
-        System.out.println(line.toText());
+       // System.out.println(line.toText());
       }
     }
     // Assert.assertTrue(path != null);

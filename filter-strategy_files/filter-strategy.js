@@ -4,8 +4,8 @@ var currentDate;
 // var startDate = new Date(1272736800000); // lower bound of when values
 // var endDate = new Date(1272737100000); // upper value of when values
 var startDate = new Date(0); // lower bound of when values
-var endDate = new Date(994000); // upper value of when values
-var step = 7; // sencods to advance each interval
+var endDate = new Date(20240000); // upper value of when values
+var step = 60; // sencods to advance each interval
 var interval = 0.125; // seconds between each step in the animation
 
 function startAnimation() {
