@@ -6,7 +6,7 @@ var currentDate;
 var startDate = new Date(0); // lower bound of when values
 var endDate = new Date(20240000); // upper value of when values
 var step = 60; // sencods to advance each interval
-var interval = 0.125; // seconds between each step in the animation
+var interval = 0.03; // seconds between each step in the animation
 
 function startAnimation() {
     if (animationTimer) {
@@ -18,8 +18,8 @@ function startAnimation() {
     var spanEl = document.getElementById("span");
     var next = function() {
     //	alert("working! current date " + currentDate + " end date " + endDate );
-    	var span = parseInt(spanEl.value, 10);
-    	//var span = 14;
+    	//var span = parseInt(spanEl.value, 10);
+    	var span = 14;
         if (currentDate < endDate) {
             filter.lowerBoundary = currentDate;
             filter.upperBoundary = new Date(currentDate.getTime() + (span * 1000));
