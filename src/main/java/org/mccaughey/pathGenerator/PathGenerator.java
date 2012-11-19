@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 
 import org.geotools.data.DataUtilities;
@@ -38,6 +38,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.TopologyException;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.linearref.LinearLocation;
@@ -45,55 +46,76 @@ import com.vividsolutions.jts.linearref.LocationIndexedLine;
 
 public class PathGenerator {
 
-  private static final int GEOMETRY_PRECISION = 100;
+  private static final double GEOMETRY_PRECISION = 100;
   private static final int INTERSECTION_THRESHOLD = 3;
   static final Logger LOGGER = LoggerFactory.getLogger(PathGenerator.class);
-  private static final Double MAX_SNAP_DISTANCE = 50.0;
+  private static final Double MAX_SNAP_DISTANCE = 500.0;
   private static PrecisionModel precision = new PrecisionModel(
       GEOMETRY_PRECISION);
 
-  public Path shortestPath(SimpleFeatureSource networkSource, Point start,
-      Point end) throws Exception {
+  public List<Path> shortestPaths(SimpleFeatureSource networkSource,
+      Point start, List<Point> destinations) throws Exception {
+
     List<LineString> lines = nodeIntersections(networkSource.getFeatures());
 
-    // Graph graph = buildGraph(lines);
+    // Build a graph with all the destinations connected
     LineStringGraphGenerator lineStringGen = createGraphWithAdditionalNodes(
-        lines, start, end);
-    Node startNode = lineStringGen.getNode(start.getCoordinate());
-    Node endNode = lineStringGen.getNode(end.getCoordinate());
-    LOGGER.info("Start Node: " + startNode.toString());
-    LOGGER.info("End Node: " + endNode.toString());
+        lines, start, destinations);
     Graph graph = lineStringGen.getGraph();
     LOGGER.info("GRAPH: " + graph);
+    writeNetworkFromEdges(graph.getEdges(), networkSource.getSchema());
 
-    Path shortest = findAStarShortestPath(graph, startNode, endNode);
-    writePathFromEdges(shortest.getEdges(), networkSource.getSchema());
-   //sl CoordinateReferenceSystem crs = new CoordinateReferenceSystem();
-    //LOGGER.info("NETWORK CRS: {}", networkSource.getSchema().getCoordinateReferenceSystem());
-    writePathAsNodes(shortest.getEdges(), networkSource.getSchema().getCoordinateReferenceSystem());
-    return shortest;
+    Node startNode = lineStringGen.getNode(start.getCoordinate());
+
+    List<Path> paths = new ArrayList();
+    for (Point end : destinations) {
+
+      try {
+      Node endNode = lineStringGen.getNode(end.getCoordinate());
+      if (endNode != null) {
+        LOGGER.info("Start Node: " + startNode.toString());
+        LOGGER.info("End Node: " + endNode.toString());
+
+        Path shortest = findAStarShortestPath(graph, startNode, endNode);
+        paths.add(shortest);
+
+      }
+      } catch(Exception e) {
+        LOGGER.error("Something bad happened, ignoring");
+      }
+    }
+
+    writePathNodes(paths, networkSource.getSchema()
+        .getCoordinateReferenceSystem());
+
+    return paths;
   }
 
   private static LineStringGraphGenerator createGraphWithAdditionalNodes(
-      List<LineString> lines, Point startingPoint, Point endPoint)
+      List<LineString> lines, Point startingPoint, List<Point> destinations)
       throws IOException {
 
     LocationIndexedLine startConnectedLine = findNearestEdgeLine(lines,
         MAX_SNAP_DISTANCE, startingPoint);
-    LocationIndexedLine endConnectedLine = findNearestEdgeLine(lines,
-        MAX_SNAP_DISTANCE, endPoint);
+
+    if (startConnectedLine != null) {
+      addConnectingLine(startingPoint, lines, startConnectedLine);
+    }
+
+    for (Point endPoint : destinations) {
+      LocationIndexedLine endConnectedLine = findNearestEdgeLine(lines,
+          MAX_SNAP_DISTANCE, endPoint);
+      if (endConnectedLine != null) {
+        addConnectingLine(endPoint, lines, endConnectedLine);
+      }
+    }
+    nodeIntersections(lines);
+
     // create a linear graph generator
     LineStringGraphGenerator lineStringGen = new LineStringGraphGenerator();
-
-    LOGGER.info("Lines Count: " + lines.size());
-
-    lines = addConnectingLine(startingPoint, lines, startConnectedLine);
-    lines = addConnectingLine(endPoint, lines, endConnectedLine);
-    lines = nodeIntersections(lines);
     for (LineString line : lines) {
       lineStringGen.add(line);
     }
-    LOGGER.info("Lines Count: " + lines.size());
 
     return lineStringGen;
 
@@ -196,21 +218,50 @@ public class PathGenerator {
     writeFeatures(DataUtilities.collection(featuresList), file);
   }
 
+  private static void writePathNodes(List<Path> paths,
+      CoordinateReferenceSystem crs) {
+    SimpleFeatureType featureType = createPathFeatureType(crs);
+    // LOGGER.info("Using Feature Type with CRS: {}",
+    // featureType.getCoordinateReferenceSystem());
+    GeometryFactory geometryFactory = new GeometryFactory(precision);
+    List<SimpleFeature> featuresList = new ArrayList();
+    // long unix_time = (long)(System.currentTimeMillis());
+    for (Path path : paths) {
+      List<Edge> edges = path.getEdges();
+      long unix_time = 0; // The epoch
+      for (Edge edge : edges) {
+        LineString line = (LineString) edge.getObject();
+        line = (LineString) Densifier.densify(line, 10.0);
+        for (Coordinate coordinate : line.getCoordinates()) {
+          Point point = geometryFactory.createPoint(coordinate);
+          SimpleFeature feature = buildTimeFeatureFromGeometry(featureType,
+              point, unix_time);
+          unix_time += 7000;// 7 seconds
+          featuresList.add(feature);
+        }
+      }
+    }
+    File file = new File("all_path_nodes.json");
+    writeFeatures(DataUtilities.collection(featuresList), file);
+  }
+
   private static void writePathAsNodes(List<Edge> edges,
       CoordinateReferenceSystem crs) {
     SimpleFeatureType featureType = createPathFeatureType(crs);
-   // LOGGER.info("Using Feature Type with CRS: {}", featureType.getCoordinateReferenceSystem());
+    // LOGGER.info("Using Feature Type with CRS: {}",
+    // featureType.getCoordinateReferenceSystem());
     GeometryFactory geometryFactory = new GeometryFactory(precision);
     List<SimpleFeature> featuresList = new ArrayList();
-   // long unix_time = (long)(System.currentTimeMillis());
-    long unix_time = 0; //The epoch
+    // long unix_time = (long)(System.currentTimeMillis());
+    long unix_time = 0; // The epoch
     for (Edge edge : edges) {
       LineString line = (LineString) edge.getObject();
-      line = (LineString) Densifier.densify(line,1.0);
+      line = (LineString) Densifier.densify(line, 1.0);
       for (Coordinate coordinate : line.getCoordinates()) {
         Point point = geometryFactory.createPoint(coordinate);
-        SimpleFeature feature = buildTimeFeatureFromGeometry(featureType,point,unix_time);
-        unix_time+=1000;//1 second
+        SimpleFeature feature = buildTimeFeatureFromGeometry(featureType,
+            point, unix_time);
+        unix_time += 1000;// 1 second
         featuresList.add(feature);
       }
     }
@@ -228,7 +279,7 @@ public class PathGenerator {
     sfb.add(unix_time);
     return sfb.buildFeature(null);
   }
-  
+
   private static SimpleFeatureType createPathFeatureType(
       CoordinateReferenceSystem crs) {
 
@@ -248,12 +299,11 @@ public class PathGenerator {
     return pathType;
   }
 
-  private static void writeNetworkFromEdges(HashSet<Edge> edges,
+  private static void writeNetworkFromEdges(Collection<Edge> collection,
       SimpleFeatureType featureType) {
     List<SimpleFeature> featuresList = new ArrayList();
-   
-   
-    for (Edge edge : edges) {
+
+    for (Edge edge : collection) {
       SimpleFeature feature = buildFeatureFromGeometry(featureType,
           (Geometry) edge.getObject());
       featuresList.add(feature);
@@ -262,8 +312,6 @@ public class PathGenerator {
     writeFeatures(DataUtilities.collection(featuresList), file);
   }
 
-
-  
   private static SimpleFeature buildFeatureFromGeometry(
       SimpleFeatureType featureType, Geometry geom) {
     SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
@@ -283,7 +331,8 @@ public class PathGenerator {
           LOGGER.info("Encoding CRS?");
           fjson.setEncodeFeatureCollectionBounds(true);
           fjson.setEncodeFeatureCollectionCRS(true);
-          //fjson.writeCRS(features.getSchema().getCoordinateReferenceSystem(), os);
+          // fjson.writeCRS(features.getSchema().getCoordinateReferenceSystem(),
+          // os);
         } else {
           LOGGER.info("CRS is null");
         }
@@ -346,17 +395,20 @@ public class PathGenerator {
     GeometryFactory geomFactory = new GeometryFactory(precision);
     Geometry grandMls = geomFactory.buildGeometry(lines);
     Point mlsPt = geomFactory.createPoint(grandMls.getCoordinate());
-    Geometry nodedLines = grandMls.union(mlsPt);
+    try {
+      Geometry nodedLines = grandMls.union(mlsPt);
 
-    lines.clear();
+      lines.clear();
 
-    for (int i = 0, n = nodedLines.getNumGeometries(); i < n; i++) {
-      Geometry g = nodedLines.getGeometryN(i);
-      if (g instanceof LineString) {
-        lines.add((LineString) g);
+      for (int i = 0, n = nodedLines.getNumGeometries(); i < n; i++) {
+        Geometry g = nodedLines.getGeometryN(i);
+        if (g instanceof LineString) {
+          lines.add((LineString) g);
+        }
       }
+    } catch (TopologyException te) {
+      LOGGER.info("Failed to node non-noded intersection, ugh");
     }
-
     return lines;
   }
 

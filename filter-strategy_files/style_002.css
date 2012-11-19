@@ -81,6 +81,12 @@ h6 {
     height: 256px;
     border: 1px solid #ccc;
 }
+
+.largemap {
+    width: 1280px;
+    height: 720px;
+    border: 1px solid #ccc;
+}
 #tags {
     display: none;
 }

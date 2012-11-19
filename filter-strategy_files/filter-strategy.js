@@ -4,8 +4,8 @@ var currentDate;
 // var startDate = new Date(1272736800000); // lower bound of when values
 // var endDate = new Date(1272737100000); // upper value of when values
 var startDate = new Date(0); // lower bound of when values
-var endDate = new Date(240000); // upper value of when values
-var step = 8; // sencods to advance each interval
+var endDate = new Date(994000); // upper value of when values
+var step = 7; // sencods to advance each interval
 var interval = 0.125; // seconds between each step in the animation
 
 function startAnimation() {
@@ -18,8 +18,8 @@ function startAnimation() {
     var spanEl = document.getElementById("span");
     var next = function() {
     //	alert("working! current date " + currentDate + " end date " + endDate );
-    	//var span = parseInt(spanEl.value, 10);
-    	var span = 1;
+    	var span = parseInt(spanEl.value, 10);
+    	//var span = 14;
         if (currentDate < endDate) {
             filter.lowerBoundary = currentDate;
             filter.upperBoundary = new Date(currentDate.getTime() + (span * 1000));
@@ -85,32 +85,5 @@ renderers: ["Canvas", "SVG", "VML"]
 
 
 map.addLayers([osm, paths]);
-map.setCenter(new OpenLayers.LonLat(144.572412433435773, -37.731804450869475).transform(geographic, mercator), 8);
-
-// var flights = new OpenLayers.Layer.Vector("Aircraft Locations", {
-// projection: geographic,
-// strategies: [new OpenLayers.Strategy.Fixed(), filterStrategy],
-// protocol: new OpenLayers.Protocol.HTTP({
-// url: "kml-track.kml",
-// format: new OpenLayers.Format.KML({
-// extractTracks: true
-// //,extractStyles: true // use style from KML instead of styleMap below
-// })
-// }),
-// styleMap: new OpenLayers.StyleMap({
-// "default": new OpenLayers.Style({
-// graphicName: "circle",
-// pointRadius: 3,
-// fillOpacity: 0.25,
-// fillColor: "#ffcc66",
-// strokeColor: "#ff9933",
-// strokeWidth: 1
-// })
-// }),
-// renderers: ["Canvas", "SVG", "VML"]
-// });
-//
-// map.addLayers([osm, flights]);
-// map.setCenter(new OpenLayers.LonLat(-93.2735, 44.8349).transform(geographic,
-// mercator), 8);
+map.setCenter(new OpenLayers.LonLat(144.570412433435773, -37.701804450869475).transform(geographic, mercator), 16);
 
