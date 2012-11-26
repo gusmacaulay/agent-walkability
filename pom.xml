@@ -5,7 +5,7 @@
 	<groupId>org.mccaughey</groupId>
 	<artifactId>agent-walkability</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>agent-walkability</name>
 	<url>http://maven.apache.org</url>
@@ -38,6 +38,11 @@
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
+			<version>1.15</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-servlet</artifactId>
 			<version>1.15</version>
 		</dependency>
 		<dependency>
@@ -98,6 +103,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>8.1.8.v20121106</version>
 			</plugin>
 		</plugins>
 	</build>
