@@ -54,7 +54,7 @@ public class PathGenerator {
   private static PrecisionModel precision = new PrecisionModel(
       GEOMETRY_PRECISION);
 
-  public List<Path> shortestPaths(SimpleFeatureSource networkSource,
+  public static List<Path> shortestPaths(SimpleFeatureSource networkSource,
       Point start, List<Point> destinations) throws Exception {
 
     List<LineString> lines = nodeIntersections(networkSource.getFeatures());
@@ -428,7 +428,7 @@ public class PathGenerator {
     return index;
   }
 
-  private List<LineString> nodeIntersections(
+  private static List<LineString> nodeIntersections(
       SimpleFeatureCollection nonNodedNetwork) {
     SimpleFeatureIterator networkIterator = nonNodedNetwork.features();
 
@@ -487,7 +487,7 @@ public class PathGenerator {
     return lineStringGen.getGraph();
   }
 
-  private Path findAStarShortestPath(Graph graph, Node start, Node destination)
+  private static Path findAStarShortestPath(Graph graph, Node start, Node destination)
       throws Exception { // WrongPathException { <--- FIXME: WrongPathException
                          // is not visible
     // create a cost function and heuristic for A-Star
