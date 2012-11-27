@@ -129,7 +129,7 @@ var roads = new OpenLayers.Layer.Vector("Roads", {
 	strategies: [new OpenLayers.Strategy.BBOX()],
 	//strategies: [new OpenLayers.Strategy.Fixed(),new OpenLayers.Strategy.BBox()],
 	protocol : new OpenLayers.Protocol.HTTP({
-		url : "/road_sample_wgs84.geojson",
+		url : "/graph_wgs84.geojson",
 		format : new OpenLayers.Format.GeoJSON()
 	}),
 	styleMap : new OpenLayers.StyleMap({
