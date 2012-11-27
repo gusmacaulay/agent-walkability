@@ -1,51 +1,58 @@
 <!DOCTYPE html>
-<html><head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <title>OpenLayers Filter Strategy Example</title>
-        <link rel="stylesheet" href="filter-strategy_files/style.css" type="text/css">
-        <link rel="stylesheet" href="filter-strategy_files/google.css" type="text/css">
-        <link rel="stylesheet" href="filter-strategy_files/style_002.css" type="text/css">
-        <script src="filter-strategy_files/OpenLayers.js"></script>
-        <script>OpenLayers.ImgPath = "../img/";</script>
-        <style>
-            .olControlAttribution {
-                font-size: 9px;
-                bottom: 2px;
-            }
-        </style>
-    </head>
-    <body>
-        <h1 id="title">Filter Strategy</h1>
-        <div id="tags">
-            filter, strategy, strategies, kml, advanced
-        </div>
-        <p id="shortdesc">
-            Demonstrates the filter strategy for limiting features passed to the layer.
-        </p>
-         <div id="map" class="largemap olMap"> <!--<div class="olMapViewport olControlDragPanActive olControlZoomBoxActive olControlPinchZoomActive olControlNavigationActive" style="position: relative; overflow: hidden; width: 100%; height: 100%;" id="OpenLayers_Map_2_OpenLayers_ViewPort"><div style="position: absolute; z-index: 749; left: 0px; top: 0px;" id="OpenLayers_Map_2_OpenLayers_Container"><div class="olLayerDiv olLayerGrid" dir="ltr" style="position: absolute; width: 100%; height: 100%; z-index: 100;" id="OpenLayers_Layer_OSM_18"><img src="filter-strategy_files/92.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 84px; top: 63px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/91.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 84px; top: -193px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/92_003.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 340px; top: 63px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/91_003.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 340px; top: -193px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/92_002.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: -172px; top: 63px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/91_002.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: -172px; top: -193px; width: 256px; height: 256px;" class="olTileImage"></div><div class="olLayerDiv" dir="ltr" style="position: absolute; width: 100%; height: 100%; z-index: 330; left: 0px; top: 0px;" id="OpenLayers_Layer_Vector_25"><canvas height="256" width="512" style="width: 512px; height: 256px; visibility: visible;"></canvas></div></div><div unselectable="on" class="olControlZoom olControlNoSelect" style="position: absolute; z-index: 1004;" id="OpenLayers_Control_Zoom_5"><a class="olControlZoomIn olButton" href="#zoomIn">+</a><a class="olControlZoomOut olButton" href="#zoomOut">−</a></div><div unselectable="on" class="olControlArgParser olControlNoSelect" style="position: absolute; z-index: 1004;" id="OpenLayers_Control_ArgParser_6"></div><div unselectable="on" class="olControlAttribution olControlNoSelect" style="position: absolute; z-index: 1004;" id="OpenLayers_Control_Attribution_7">© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</div></div></div> -->
-		<label for="span">time span (seconds)</label>
-        <select id="span" name="span">
-            <option value="15">15</option>
-            <option value="30">30</option>
-            <option value="60" selected="selected">60</option>
-            <option value="120">120</option>
-            <option value="240">240</option>
-        </select>
-        <input id="start" value="start" type="button">
-        <input id="stop" value="stop" type="button"><br><br>
-        <div id="docs">
-            <p>
-                This example uses a filter strategy to limit the features that are passed
-                to a layer.  Features bound for this layer have a <code>when</code> attribute
-                with date values.  A filter strategy is constructed with a between filter
-                that limits the span of dates shown.  A simple animation cycles through
-                the domain of the <code>when</code> values, calling <code>setFilter</code>
-                on the strategy with an updated filter.
-            </p>
-        </div>
-        <script src="filter-strategy_files/filter-strategy.js"></script>
-    
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>OpenLayers Filter Strategy Example</title>
+<link rel="stylesheet" href="filter-strategy_files/style.css"
+	type="text/css">
+<link rel="stylesheet" href="filter-strategy_files/google.css"
+	type="text/css">
+<link rel="stylesheet" href="filter-strategy_files/style_002.css"
+	type="text/css">
+<script src="filter-strategy_files/OpenLayers.js"></script>
+<script>
+	OpenLayers.ImgPath = "../img/";
+</script>
+<style>
+.olControlAttribution {
+	font-size: 9px;
+	bottom: 2px;
+}
+</style>
+</head>
+<body>
+	<h1 id="title">Agent Based Walkability Model</h1>
+	<div id="tags">filter, strategy, strategies, kml, advanced</div>
+	<p id="shortdesc">An animated visualisation of Agent Based Walkability</p>
+	<input id="simulate" value="simulate" type="button">
+	<input id="play" value="play" type="button">
+	<input id="pause" value="pause" type="button">
+	<br>
+	<br>
+	<div id="map" class="largemap olMap"></div>
+	<!--<div class="olMapViewport olControlDragPanActive olControlZoomBoxActive olControlPinchZoomActive olControlNavigationActive" style="position: relative; overflow: hidden; width: 100%; height: 100%;" id="OpenLayers_Map_2_OpenLayers_ViewPort"><div style="position: absolute; z-index: 749; left: 0px; top: 0px;" id="OpenLayers_Map_2_OpenLayers_Container"><div class="olLayerDiv olLayerGrid" dir="ltr" style="position: absolute; width: 100%; height: 100%; z-index: 100;" id="OpenLayers_Layer_OSM_18"><img src="filter-strategy_files/92.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 84px; top: 63px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/91.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 84px; top: -193px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/92_003.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 340px; top: 63px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/91_003.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 340px; top: -193px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/92_002.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: -172px; top: 63px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/91_002.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: -172px; top: -193px; width: 256px; height: 256px;" class="olTileImage"></div><div class="olLayerDiv" dir="ltr" style="position: absolute; width: 100%; height: 100%; z-index: 330; left: 0px; top: 0px;" id="OpenLayers_Layer_Vector_25"><canvas height="256" width="512" style="width: 512px; height: 256px; visibility: visible;"></canvas></div></div><div unselectable="on" class="olControlZoom olControlNoSelect" style="position: absolute; z-index: 1004;" id="OpenLayers_Control_Zoom_5"><a class="olControlZoomIn olButton" href="#zoomIn">+</a><a class="olControlZoomOut olButton" href="#zoomOut">−</a></div><div unselectable="on" class="olControlArgParser olControlNoSelect" style="position: absolute; z-index: 1004;" id="OpenLayers_Control_ArgParser_6"></div><div unselectable="on" class="olControlAttribution olControlNoSelect" style="position: absolute; z-index: 1004;" id="OpenLayers_Control_Attribution_7">© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</div></div></div> -->
 
-</body></html>
+
+	<div id="docs">
+		<p>
+			This example uses a filter strategy to limit the features that are
+			passed to a layer. Features bound for this layer have a
+			<code>when</code>
+			attribute with date values. A filter strategy is constructed with a
+			between filter that limits the span of dates shown. A simple
+			animation cycles through the domain of the
+			<code>when</code>
+			values, calling
+			<code>setFilter</code>
+			on the strategy with an updated filter.
+		</p>
+	</div>
+	<script src="filter-strategy_files/filter-strategy.js"></script>
+	<!-- 		<script type="text/javascript" src="filter-strategy_files/heatmap.js"></script> -->
+	<!-- 		<script type="text/javascript" -->
+	<!-- 			src="filter-strategy_files/heatmap-openlayers.js"></script> -->
+</body>
+</html>
