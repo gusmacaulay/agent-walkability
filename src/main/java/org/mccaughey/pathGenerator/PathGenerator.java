@@ -55,7 +55,7 @@ public class PathGenerator {
       GEOMETRY_PRECISION);
 
   public static List<Path> shortestPaths(SimpleFeatureSource networkSource,
-      Point start, List<Point> destinations) throws Exception {
+      Point start, List<Point> destinations, File file) throws Exception {
 
     List<LineString> lines = nodeIntersections(networkSource.getFeatures());
 
@@ -86,8 +86,8 @@ public class PathGenerator {
       }
     }
 
-    writePathNodes(paths, startNode, networkSource.getSchema()
-        .getCoordinateReferenceSystem());
+    PathGenerator.writePathNodes(paths, startNode, networkSource.getSchema()
+        .getCoordinateReferenceSystem(),file);
 
     return paths;
   }
@@ -219,8 +219,8 @@ public class PathGenerator {
     writeFeatures(DataUtilities.collection(featuresList), file);
   }
 
-  private static void writePathNodes(List<Path> paths, Node start,
-      CoordinateReferenceSystem crs) {
+  public static void writePathNodes(List<Path> paths, Node start,
+      CoordinateReferenceSystem crs, File file) {
     SimpleFeatureType featureType = createPathFeatureType(crs);
     // LOGGER.info("Using Feature Type with CRS: {}",
     // featureType.getCoordinateReferenceSystem());
@@ -326,8 +326,9 @@ public class PathGenerator {
         }
       }
     }
-    File file = new File("all_path_nodes.json");
+    
     writeFeatures(DataUtilities.collection(featuresList), file);
+    LOGGER.info("GeoJSON writing complete");
   }
 
   private static SimpleFeature buildTimeFeatureFromGeometry(

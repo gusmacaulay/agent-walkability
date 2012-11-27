@@ -67,7 +67,8 @@ projection: geographic,
 strategies: [new OpenLayers.Strategy.Fixed(), filterStrategy],
 //strategies: [new OpenLayers.Strategy.BBOX()],
 protocol: new OpenLayers.Protocol.HTTP({
-  url: "paths_wgs84.geojson",
+  //url: "paths_wgs84.geojson",
+	url: "/service/agent-paths",
   format: new OpenLayers.Format.GeoJSON()
 }),
 styleMap: new OpenLayers.StyleMap({
