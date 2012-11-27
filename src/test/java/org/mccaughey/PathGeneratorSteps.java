@@ -95,7 +95,7 @@ public class PathGeneratorSteps extends Embedder {
 
   @When("the path generator is asked for the shortest path/s")
   public void requestShortestPath() throws Exception {
-    paths = pathGenerator.shortestPaths(networkSource, start, destinations);
+    paths = pathGenerator.shortestPaths(networkSource, start, destinations, new File("all_path_nodes_test.json"));
     // Assert.assertTrue(true);
   }
 

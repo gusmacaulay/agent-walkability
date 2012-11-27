@@ -13,6 +13,7 @@ import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.data.store.ReprojectingFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geojson.feature.FeatureJSON;
@@ -24,8 +25,11 @@ import org.geotools.graph.structure.Graph;
 import org.geotools.graph.structure.Node;
 import org.geotools.graph.traverse.standard.AStarIterator.AStarFunctions;
 import org.geotools.graph.traverse.standard.AStarIterator.AStarNode;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CRSAuthorityFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,8 +90,7 @@ public class PathGenerator {
       }
     }
 
-    PathGenerator.writePathNodes(paths, startNode, networkSource.getSchema()
-        .getCoordinateReferenceSystem(),file);
+    writePathNodes(paths, startNode,CRS.decode("EPSG:28355"),file);
 
     return paths;
   }
@@ -326,11 +329,21 @@ public class PathGenerator {
         }
       }
     }
+    SimpleFeatureCollection pathFeatures = DataUtilities.collection(featuresList);
+    CoordinateReferenceSystem crs_target = DefaultGeographicCRS.WGS84;
+    LOGGER.info(crs.toWKT());
+    ReprojectingFeatureCollection rfc = new ReprojectingFeatureCollection(pathFeatures, crs_target);
     
-    writeFeatures(DataUtilities.collection(featuresList), file);
+    writeFeatures(rfc, file);
     LOGGER.info("GeoJSON writing complete");
   }
 
+  private static SimpleFeatureCollection reproject(SimpleFeatureCollection pathFeatures) {
+    
+    return pathFeatures;
+    
+  }
+   
   private static SimpleFeature buildTimeFeatureFromGeometry(
       SimpleFeatureType featureType, Geometry geom, long unix_time,
       String path_id) {
