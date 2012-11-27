@@ -20,8 +20,7 @@ function startAnimation() {
 	var next = function() {
 		// alert("working! current date " + currentDate + " end date " + endDate
 		// );
-		// var span = parseInt(spanEl.value, 10);
-		var span = 14;
+		var span = 40
 		if (currentDate < endDate) {
 			filter.lowerBoundary = currentDate;
 			filter.upperBoundary = new Date(currentDate.getTime()
@@ -49,7 +48,7 @@ function loadPaths() {
 		type : OpenLayers.Filter.Comparison.BETWEEN,
 		property : "when",
 		lowerBoundary : startDate,
-		upperBoundary : new Date(startDate.getTime() + (14 * 1000))
+		upperBoundary : new Date(startDate.getTime() + (15 * 1000))
 	});
 
 	filterStrategy = new OpenLayers.Strategy.Filter({
@@ -59,7 +58,7 @@ function loadPaths() {
 	var paths = new OpenLayers.Layer.Vector("Paths", {
 		projection : geographic,
 		strategies : [ new OpenLayers.Strategy.Fixed(), filterStrategy ],
-		// strategies: [new OpenLayers.Strategy.BBOX()],
+
 		protocol : new OpenLayers.Protocol.HTTP({
 			// url: "paths_wgs84.geojson",
 			url : "/service/agent-paths",
@@ -68,10 +67,10 @@ function loadPaths() {
 		styleMap : new OpenLayers.StyleMap({
 			"default" : new OpenLayers.Style({
 				graphicName : "circle",
-				pointRadius : 3,
-				fillOpacity : 0.25,
-				fillColor : "#ffcc66",
-				strokeColor : "#ff9933",
+				pointRadius : 10,
+				fillOpacity : 0.10,
+				fillColor : "#9e69e3",
+				strokeColor : "#8e45ed",
 				strokeWidth : 1
 			})
 		}),
@@ -84,26 +83,32 @@ function loadPaths() {
 //	.transform(geographic, mercator), 16);
 
 }
+function showValue(newValue, spanId)
+{
+	document.getElementById(spanId).innerHTML=newValue;
+}
 
 // add behavior to elements
 document.getElementById("simulate").onclick = loadPaths;
 document.getElementById("play").onclick = startAnimation;
 document.getElementById("pause").onclick = stopAnimation;
+//document.getElementById("slider").onchange = showValue;
 
 
 var mercator = new OpenLayers.Projection("EPSG:900913");
 var geographic = new OpenLayers.Projection("EPSG:4326");
-map = new OpenLayers.Map("map");
+//var victorian = new OpenLayers.Projection("EPSG:28355");
+var controls = [new OpenLayers.Control.LayerSwitcher(), new OpenLayers.Control.Zoom()];
+map = new OpenLayers.Map("map", {controls : controls});
 
 var osm = new OpenLayers.Layer.OSM();
 
-var paths_static = new OpenLayers.Layer.Vector("Paths Static", {
+var paths_static = new OpenLayers.Layer.Vector("Paths Buffer", {
 	projection : geographic,
-	//strategies : [ new OpenLayers.Strategy.Fixed(), filterStrategy ],
-	strategies: [new OpenLayers.Strategy.Fixed(),new OpenLayers.Strategy.Cluster()],
+	strategies: [new OpenLayers.Strategy.BBOX()],
+	//strategies: [new OpenLayers.Strategy.Fixed(),new OpenLayers.Strategy.BBox()],
 	protocol : new OpenLayers.Protocol.HTTP({
-		// url: "paths_wgs84.geojson",
-		url : "/service/agent-paths",
+		url : "/paths_buffer_wgs84.geojson",
 		format : new OpenLayers.Format.GeoJSON()
 	}),
 	styleMap : new OpenLayers.StyleMap({
@@ -111,14 +116,35 @@ var paths_static = new OpenLayers.Layer.Vector("Paths Static", {
 			graphicName : "circle",
 			pointRadius : 10,
 			fillOpacity : 0.25,
-			fillColor : "#ffcc66",
-			strokeColor : "#ff9933",
+			fillColor : "#4de800",
+			strokeColor : "#02aa21",
 			strokeWidth : 1
 		})
 	}),
 	renderers : [ "Canvas", "SVG", "VML" ]
 });
-//map.addLayers([paths_static])'
-map.addLayers([osm]);
+
+var roads = new OpenLayers.Layer.Vector("Roads", {
+	projection : geographic,
+	strategies: [new OpenLayers.Strategy.BBOX()],
+	//strategies: [new OpenLayers.Strategy.Fixed(),new OpenLayers.Strategy.BBox()],
+	protocol : new OpenLayers.Protocol.HTTP({
+		url : "/road_sample_wgs84.geojson",
+		format : new OpenLayers.Format.GeoJSON()
+	}),
+	styleMap : new OpenLayers.StyleMap({
+		"default" : new OpenLayers.Style({
+			graphicName : "circle",
+			pointRadius : 10,
+			fillOpacity : 0.25,
+			fillColor : "#428beb",
+			strokeColor : "#428beb",
+			strokeWidth : 3
+		})
+	}),
+	renderers : [ "Canvas", "SVG", "VML" ]
+});
+
+map.addLayers([paths_static, roads, osm])
 map.setCenter(new OpenLayers.LonLat(144.570412433435773, -37.701804450869475)
 		.transform(geographic, mercator), 16);

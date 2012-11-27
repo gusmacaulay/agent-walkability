@@ -27,6 +27,19 @@
 	<h1 id="title">Agent Based Walkability Model</h1>
 	<div id="tags">filter, strategy, strategies, kml, advanced</div>
 	<p id="shortdesc">An animated visualisation of Agent Based Walkability</p>
+	
+	<i>Maximum Walking Time</i>
+	<input id="walkingTimeSlider" type="range"  min="1" max="30" value="0" step="1" onChange="showValue(this.value,'walkingTime');" />
+	<span id="walkingTime">0</span>
+	<i>Minutes</i>
+	<i>Walking Speed</i>
+	<input id="walkingSpeedSlider" type="range"  min="1" max="10" value="4" step="1" onChange="showValue(this.value,'walkingSpeed');" />
+	<span id="walkingSpeed">0</span>
+	<i>m/s</i>
+	<i>Maximum Distance</i>
+	<input id="distanceSlider" type="range"  min="0" max="2000" value="1600" step="50" onChange="showValue(this.value,'distance');" />
+	<span id="distance">0</span>
+	<i>Metres</i>
 	<input id="simulate" value="simulate" type="button">
 	<input id="play" value="play" type="button">
 	<input id="pause" value="pause" type="button">
