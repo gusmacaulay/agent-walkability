@@ -29,7 +29,6 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.referencing.crs.CRSAuthorityFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,13 +47,14 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import com.vividsolutions.jts.linearref.LinearLocation;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
+import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 
 public class PathGenerator {
 
   private static final double GEOMETRY_PRECISION = 100;
   private static final int INTERSECTION_THRESHOLD = 3;
   static final Logger LOGGER = LoggerFactory.getLogger(PathGenerator.class);
-  private static final Double MAX_SNAP_DISTANCE = 500.0;
+  private static final Double MAX_SNAP_DISTANCE = 5000.0;
   private static PrecisionModel precision = new PrecisionModel(
       GEOMETRY_PRECISION);
 
@@ -291,12 +291,12 @@ public class PathGenerator {
                                                            // line
                 // for (Coordinate coordinate : line.getCoordinates()) {
                 //LOGGER
-                for (int index = 0; index < lil.getEndIndex(); index++) {
+                for (int index = 0; index < lil.getEndIndex(); index+=25) {
                   Coordinate coordinate = lil.extractPoint(index);
                   Point point = geometryFactory.createPoint(coordinate);
                   SimpleFeature feature = buildTimeFeatureFromGeometry(
                       featureType, point, unix_time, String.valueOf(path_id));
-                  unix_time += 7000;// 7 seconds
+                  unix_time += 35000;// 7 seconds
                   featuresList.add(feature);
                 }
               } else if (lil.project(pt) == lil.getEndIndex()) { // start
@@ -305,12 +305,12 @@ public class PathGenerator {
                                                                  // end of the
                                                                  // line
    
-                for (int index = (int) lil.getEndIndex(); index >= 0; index--) {
+                for (int index = (int) lil.getEndIndex(); index >= 0; index-=25) {
                   Coordinate coordinate = lil.extractPoint(index);
                   Point point = geometryFactory.createPoint(coordinate);
                   SimpleFeature feature = buildTimeFeatureFromGeometry(
                       featureType, point, unix_time, String.valueOf(path_id));
-                  unix_time += 7000;// 7 seconds
+                  unix_time += 35000;// 7 seconds
                   featuresList.add(feature);
                 }
               } else {
@@ -480,7 +480,9 @@ public class PathGenerator {
       for (int i = 0, n = nodedLines.getNumGeometries(); i < n; i++) {
         Geometry g = nodedLines.getGeometryN(i);
         if (g instanceof LineString) {
-          g = (LineString) Densifier.densify(g, 10.0);
+           // DouglasPeuckerSimplifier dpls = new DouglasPeuckerSimplifier(g); 
+          //  g = (LineString) DouglasPeuckerSimplifier.simplify(g, 40);
+          g = (LineString) Densifier.densify(g, 5.0);
           lines.add((LineString) g);
         }
       }

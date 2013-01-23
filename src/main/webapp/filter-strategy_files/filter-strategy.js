@@ -6,7 +6,7 @@ var currentDate;
 var startDate = new Date(0); // lower bound of when values
 var endDate = new Date(20240000); // upper value of when values
 var step = 60; // sencods to advance each interval
-var interval = 0.03; // seconds between each step in the animation
+var interval = 0.5; // seconds between each step in the animation
 var easting,northing;
 
 function startAnimation() {
@@ -23,13 +23,13 @@ function startAnimation() {
 		// );
 		var span = 40
 		if (currentDate < endDate) {
-			filter.lowerBoundary = currentDate;
+			filter.lowerBoundary = startDate;//currentDate;
 			filter.upperBoundary = new Date(currentDate.getTime()
 					+ (span * 1000));
 			filterStrategy.setFilter(filter);
 			currentDate = new Date(currentDate.getTime() + (step * 1000));
 		} else {
-			stopAnimation(true);
+			//stopAnimation(true);
 		}
 	};
 
@@ -71,7 +71,7 @@ function loadPaths() {
 			"default" : new OpenLayers.Style({
 				graphicName : "circle",
 				pointRadius : 10,
-				fillOpacity : 0.10,
+				fillOpacity : 0.5,
 				fillColor : "#9e69e3",
 				strokeColor : "#8e45ed",
 				strokeWidth : 1
