@@ -7,6 +7,7 @@ var startDate = new Date(0); // lower bound of when values
 var endDate = new Date(20240000); // upper value of when values
 var step = 60; // sencods to advance each interval
 var interval = 0.03; // seconds between each step in the animation
+var easting,northing;
 
 function startAnimation() {
 	//loadPaths();
@@ -43,6 +44,7 @@ function stopAnimation(reset) {
 	}
 }
 
+
 function loadPaths() {
 	filter = new OpenLayers.Filter.Comparison({
 		type : OpenLayers.Filter.Comparison.BETWEEN,
@@ -61,7 +63,8 @@ function loadPaths() {
 
 		protocol : new OpenLayers.Protocol.HTTP({
 			// url: "paths_wgs84.geojson",
-			url : "/service/agent-paths/285752.0/5824386.0",
+			//url : "/service/agent-paths/285752.0/5824386.0",
+			url : "/service/agent-paths/" + easting + "/" + northing,
 			format : new OpenLayers.Format.GeoJSON()
 		}),
 		styleMap : new OpenLayers.StyleMap({
@@ -97,6 +100,7 @@ document.getElementById("pause").onclick = stopAnimation;
 
 var mercator = new OpenLayers.Projection("EPSG:900913");
 var geographic = new OpenLayers.Projection("EPSG:4326");
+var vicgrid = new OpenLayers.Projection("EPSG:28355");
 //var victorian = new OpenLayers.Projection("EPSG:28355");
 var controls = [new OpenLayers.Control.LayerSwitcher(), new OpenLayers.Control.Zoom()];
 map = new OpenLayers.Map("map", {controls : controls});
@@ -145,6 +149,43 @@ var roads = new OpenLayers.Layer.Vector("Roads", {
 	renderers : [ "Canvas", "SVG", "VML" ]
 });
 
+OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
+    defaultHandlerOptions: {
+        'single': true,
+        'double': false,
+        'pixelTolerance': 0,
+        'stopSingle': false,
+        'stopDouble': false
+    },
+
+    initialize: function(options) {
+        this.handlerOptions = OpenLayers.Util.extend(
+            {}, this.defaultHandlerOptions
+        );
+        OpenLayers.Control.prototype.initialize.apply(
+            this, arguments
+        ); 
+        this.handler = new OpenLayers.Handler.Click(
+            this, {
+                'click': this.trigger
+            }, this.handlerOptions
+        );
+    }, 
+
+    trigger: function(e) {
+    	map.g
+        var lonlat = (map.getLonLatFromPixel(e.xy)); //.transform(mercator,geographic);
+        easting = lonlat.lon;
+        northing = lonlat.lat;
+        alert("You clicked near " + lonlat.lat + " N, " +
+                                  + lonlat.lon + " E");
+    }
+
+});
+
 map.addLayers([paths_static, roads, osm])
 map.setCenter(new OpenLayers.LonLat(144.570412433435773, -37.701804450869475)
 		.transform(geographic, mercator), 16);
+var click = new OpenLayers.Control.Click();
+map.addControl(click);
+click.activate();

@@ -16,8 +16,12 @@ import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -70,14 +75,24 @@ public class PathGeneratorResource {
     }
     
     //
-//    double easting = 285752.0;
-//    double northing = 5824386.0;
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(),
-        28355);
+    double eastingD= 285752.0;
+    double northingD = 5824386.0;
+    GeometryFactory geometryFactory2 = new GeometryFactory(new PrecisionModel(0));
+    //283308.0178542186 5902355.348786879
+    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(0));
     Point start = geometryFactory.createPoint(new Coordinate(Double.parseDouble(easting), Double.parseDouble(northing)));
+    Point comparison = geometryFactory2.createPoint(new Coordinate(eastingD, northingD));
+    LOGGER.info("Comparising Geom" + comparison.toString());
+    CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:3857"); //same as 900913
+    CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:28355");
+
+    MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS);
+    Point targetGeometry = (Point) JTS.transform( start, transform);
+    
+    LOGGER.info("Converted geom: " + targetGeometry.toString());
     
     File file = new File("all_path_nodes.json"); //TODO: create in memory
-    List<org.geotools.graph.path.Path> paths = PathGenerator.shortestPaths(networkSource, start, destinations,file);
+    List<org.geotools.graph.path.Path> paths = PathGenerator.shortestPaths(networkSource, targetGeometry, destinations,file);
     LOGGER.info("Paths Generated");
     FileCopyUtils.copy(new FileInputStream(file), response.getOutputStream());
     return;

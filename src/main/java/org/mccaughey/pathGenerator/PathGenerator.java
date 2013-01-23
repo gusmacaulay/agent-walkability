@@ -86,7 +86,7 @@ public class PathGenerator {
 
         }
       } catch (Exception e) {
-        LOGGER.error("Something bad happened, ignoring");
+        LOGGER.error("Something bad happened, ignoring" + e.getMessage());
       }
     }
 
