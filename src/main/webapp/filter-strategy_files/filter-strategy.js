@@ -61,7 +61,7 @@ function loadPaths() {
 
 		protocol : new OpenLayers.Protocol.HTTP({
 			// url: "paths_wgs84.geojson",
-			url : "/service/agent-paths",
+			url : "/service/agent-paths/285752.0/5824386.0",
 			format : new OpenLayers.Format.GeoJSON()
 		}),
 		styleMap : new OpenLayers.StyleMap({

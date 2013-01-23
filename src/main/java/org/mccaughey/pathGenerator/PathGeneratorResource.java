@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -46,16 +47,16 @@ public class PathGeneratorResource {
   // type "text/plain"
   //@Produces("application/json")
   
-  @RequestMapping(method = RequestMethod.GET)
-  public void getPaths(HttpServletResponse response) throws Exception {
+  @RequestMapping(value = "/{easting}/{northing}", method = RequestMethod.GET)
+  public void getPaths(HttpServletResponse response, @PathVariable String easting, @PathVariable String northing) throws Exception {
     // Hardcoded inputs for now
-//    File networkShapeFile = new File("src/test/resources/graph.shp");
-//    FileDataStore networkDataStore = FileDataStoreFinder
-//        .getDataStore(networkShapeFile);
-//    //System.out.println(networkDataStore.getInfo().toString());
-//    SimpleFeatureSource networkSource = networkDataStore.getFeatureSource();
+    File networkShapeFile = new File("src/test/resources/graph.shp");
+    FileDataStore networkDataStore = FileDataStoreFinder
+        .getDataStore(networkShapeFile);
+    //System.out.println(networkDataStore.getInfo().toString());
+    SimpleFeatureSource networkSource = networkDataStore.getFeatureSource();
 //    
-    SimpleFeatureSource networkSource = getDataSource("shireofmelton:footpaths_meltons");
+//    SimpleFeatureSource networkSource = getDataSource("shireofmelton:footpaths_meltons");
     //
     File destinationsFile = new File("src/test/resources/random_destinations.shp");
     FileDataStore destinationsDataStore = FileDataStoreFinder
@@ -69,11 +70,11 @@ public class PathGeneratorResource {
     }
     
     //
-    double easting = 285752.0;
-    double northing = 5824386.0;
+//    double easting = 285752.0;
+//    double northing = 5824386.0;
     GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(),
         28355);
-    Point start = geometryFactory.createPoint(new Coordinate(easting, northing));
+    Point start = geometryFactory.createPoint(new Coordinate(Double.parseDouble(easting), Double.parseDouble(northing)));
     
     File file = new File("all_path_nodes.json"); //TODO: create in memory
     List<org.geotools.graph.path.Path> paths = PathGenerator.shortestPaths(networkSource, start, destinations,file);
@@ -83,16 +84,16 @@ public class PathGeneratorResource {
   }
   
   private SimpleFeatureSource getDataSource(String typeName) throws IOException {
-    String getCapabilitiesWFS = "http://192.43.209.39:8080/geoserver/ows?service=wfs&version=1.0.0&request=GetCapabilities";
+      String getCapabilities = "http://localhost:8080/geoserver/wfs?REQUEST=GetCapabilities";
 //    String getCapabilitiesWFS = env.getProperty("wfs.url");
     //	"getfeature&typename=shireofmelton:footpaths_meltons";
 
     Map connectionParameters = new HashMap();
-    connectionParameters.put("WFSDataStoreFactory:GET_CAPABILITIES_URL", getCapabilitiesWFS);
+    connectionParameters.put("WFSDataStoreFactory:GET_CAPABILITIES_URL", getCapabilities);
 
     // Step 2 - connection
     DataStore data = DataStoreFinder.getDataStore( connectionParameters );
-
+    LOGGER.debug(data.toString());
     // Step 3 - discouvery
     String typeNames[] = data.getTypeNames();
     
