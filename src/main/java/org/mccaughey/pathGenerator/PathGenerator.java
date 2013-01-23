@@ -296,7 +296,7 @@ public class PathGenerator {
                   Point point = geometryFactory.createPoint(coordinate);
                   SimpleFeature feature = buildTimeFeatureFromGeometry(
                       featureType, point, unix_time, String.valueOf(path_id));
-                  unix_time += 35000;// 7 seconds
+                  unix_time += 9000;// 7 seconds
                   featuresList.add(feature);
                 }
               } else if (lil.project(pt) == lil.getEndIndex()) { // start
@@ -310,7 +310,7 @@ public class PathGenerator {
                   Point point = geometryFactory.createPoint(coordinate);
                   SimpleFeature feature = buildTimeFeatureFromGeometry(
                       featureType, point, unix_time, String.valueOf(path_id));
-                  unix_time += 35000;// 7 seconds
+                  unix_time += 9000;// 7 seconds
                   featuresList.add(feature);
                 }
               } else {

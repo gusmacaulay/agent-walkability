@@ -4,9 +4,9 @@ var currentDate;
 // var startDate = new Date(1272736800000); // lower bound of when values
 // var endDate = new Date(1272737100000); // upper value of when values
 var startDate = new Date(0); // lower bound of when values
-var endDate = new Date(20240000); // upper value of when values
-var step = 60; // sencods to advance each interval
-var interval = 0.5; // seconds between each step in the animation
+var endDate = new Date(1200000); // upper value of when values 
+var step = 9; // seccods to advance each interval
+var interval = 0.03; // seconds between each step in the animation
 var easting,northing;
 
 function startAnimation() {
@@ -28,6 +28,8 @@ function startAnimation() {
 					+ (span * 1000));
 			filterStrategy.setFilter(filter);
 			currentDate = new Date(currentDate.getTime() + (step * 1000));
+			var date = new Date(currentDate);
+			document.getElementById('clock').innerHTML = "Time: " + date.getMinutes() + "m :" + date.getSeconds() + "s";
 		} else {
 			//stopAnimation(true);
 		}
@@ -56,6 +58,40 @@ function loadPaths() {
 	filterStrategy = new OpenLayers.Strategy.Filter({
 		filter : filter
 	});
+	
+	var pathStyle = new OpenLayers.Style();
+
+	var ruleRed = new OpenLayers.Rule({
+	  filter: new OpenLayers.Filter.Comparison({
+	      type: OpenLayers.Filter.Comparison.LESS_THAN,
+	      property: "when",
+	      value: 240000,
+	  }),
+	  symbolizer: {pointRadius: 10, fillColor: "red",
+	               fillOpacity: 0.1, strokeColor: "red"}
+	});
+
+	var ruleOrange = new OpenLayers.Rule({
+	  filter: new OpenLayers.Filter.Comparison({
+	      type: OpenLayers.Filter.Comparison.GREATER_THAN_OR_EQUAL_TO,
+	      property: "when",
+	      value: 240000,
+	  }),
+	  symbolizer: {pointRadius: 10, fillColor: "orange",
+	               fillOpacity: 0.1, strokeColor: "orange"}
+	});
+	
+	var ruleYellow = new OpenLayers.Rule({
+		  filter: new OpenLayers.Filter.Comparison({
+		      type: OpenLayers.Filter.Comparison.GREATER_THAN_OR_EQUAL_TO,
+		      property: "when",
+		      value: 480000,
+		  }),
+		  symbolizer: {pointRadius: 10, fillColor: "yellow",
+		               fillOpacity: 0.1, strokeColor: "yellow"}
+		});
+
+	pathStyle.addRules([ruleRed, ruleOrange, ruleYellow]);
 
 	var paths = new OpenLayers.Layer.Vector("Paths", {
 		projection : geographic,
@@ -68,14 +104,15 @@ function loadPaths() {
 			format : new OpenLayers.Format.GeoJSON()
 		}),
 		styleMap : new OpenLayers.StyleMap({
-			"default" : new OpenLayers.Style({
-				graphicName : "circle",
-				pointRadius : 10,
-				fillOpacity : 0.5,
-				fillColor : "#9e69e3",
-				strokeColor : "#8e45ed",
-				strokeWidth : 1
-			})
+			"default" : pathStyle
+//			"default" : new OpenLayers.Style({
+//				graphicName : "circle",
+//				pointRadius : 10,
+//				fillOpacity : 0.5,
+//				fillColor : "#9e69e3",
+//				strokeColor : "#8e45ed",
+//				strokeWidth : 1
+//			})
 		}),
 		renderers : [ "Canvas", "SVG", "VML" ]
 	});
@@ -107,26 +144,26 @@ map = new OpenLayers.Map("map", {controls : controls});
 
 var osm = new OpenLayers.Layer.OSM();
 
-var paths_static = new OpenLayers.Layer.Vector("Paths Buffer", {
-	projection : geographic,
-	strategies: [new OpenLayers.Strategy.BBOX()],
-	//strategies: [new OpenLayers.Strategy.Fixed(),new OpenLayers.Strategy.BBox()],
-	protocol : new OpenLayers.Protocol.HTTP({
-		url : "/paths_buffer_wgs84.geojson",
-		format : new OpenLayers.Format.GeoJSON()
-	}),
-	styleMap : new OpenLayers.StyleMap({
-		"default" : new OpenLayers.Style({
-			graphicName : "circle",
-			pointRadius : 10,
-			fillOpacity : 0.25,
-			fillColor : "#4de800",
-			strokeColor : "#02aa21",
-			strokeWidth : 1
-		})
-	}),
-	renderers : [ "Canvas", "SVG", "VML" ]
-});
+//var paths_static = new OpenLayers.Layer.Vector("Paths Buffer", {
+//	projection : geographic,
+//	strategies: [new OpenLayers.Strategy.BBOX()],
+//	//strategies: [new OpenLayers.Strategy.Fixed(),new OpenLayers.Strategy.BBox()],
+//	protocol : new OpenLayers.Protocol.HTTP({
+//		url : "/paths_buffer_wgs84.geojson",
+//		format : new OpenLayers.Format.GeoJSON()
+//	}),
+//	styleMap : new OpenLayers.StyleMap({
+//		"default" : new OpenLayers.Style({
+//			graphicName : "circle",
+//			pointRadius : 10,
+//			fillOpacity : 0.25,
+//			fillColor : "#4de800",
+//			strokeColor : "#02aa21",
+//			strokeWidth : 1
+//		})
+//	}),
+//	renderers : [ "Canvas", "SVG", "VML" ]
+//});
 
 var roads = new OpenLayers.Layer.Vector("Roads", {
 	projection : geographic,
@@ -183,7 +220,7 @@ OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
 
 });
 
-map.addLayers([paths_static, roads, osm])
+map.addLayers([roads, osm])
 map.setCenter(new OpenLayers.LonLat(144.570412433435773, -37.701804450869475)
 		.transform(geographic, mercator), 16);
 var click = new OpenLayers.Control.Click();
