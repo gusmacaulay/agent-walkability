@@ -75,14 +75,14 @@ public class PathGeneratorResource {
     }
     
     //
-    double eastingD= 285752.0;
-    double northingD = 5824386.0;
+   // double eastingD= 285752.0;
+   // double northingD = 5824386.0;
     GeometryFactory geometryFactory2 = new GeometryFactory(new PrecisionModel(0));
     //283308.0178542186 5902355.348786879
     GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(0));
     Point start = geometryFactory.createPoint(new Coordinate(Double.parseDouble(easting), Double.parseDouble(northing)));
-    Point comparison = geometryFactory2.createPoint(new Coordinate(eastingD, northingD));
-    LOGGER.info("Comparising Geom" + comparison.toString());
+   // Point comparison = geometryFactory2.createPoint(new Coordinate(eastingD, northingD));
+   // LOGGER.info("Comparising Geom" + comparison.toString());
     CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:3857"); //same as 900913
     CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:28355");
 

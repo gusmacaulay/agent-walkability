@@ -4,26 +4,26 @@ var currentDate;
 // var startDate = new Date(1272736800000); // lower bound of when values
 // var endDate = new Date(1272737100000); // upper value of when values
 var startDate = new Date(0); // lower bound of when values
-var endDate = new Date(1200000); // upper value of when values 
+var endDate = new Date(1200000); // upper value of when values
 var step = 9; // seccods to advance each interval
 var interval = 0.03; // seconds between each step in the animation
 var easting,northing;
 
 function startAnimation() {
-	//loadPaths();
+	// loadPaths();
 	if (animationTimer) {
 		stopAnimation(true);
 	}
 	if (!currentDate) {
 		currentDate = startDate;
 	}
-	//var spanEl = document.getElementById("span");
+	// var spanEl = document.getElementById("span");
 	var next = function() {
 		// alert("working! current date " + currentDate + " end date " + endDate
 		// );
 		var span = 40
 		if (currentDate < endDate) {
-			filter.lowerBoundary = startDate;//currentDate;
+			filter.lowerBoundary = startDate;// currentDate;
 			filter.upperBoundary = new Date(currentDate.getTime()
 					+ (span * 1000));
 			filterStrategy.setFilter(filter);
@@ -31,7 +31,7 @@ function startAnimation() {
 			var date = new Date(currentDate);
 			document.getElementById('clock').innerHTML = "Time: " + date.getMinutes() + "m :" + date.getSeconds() + "s";
 		} else {
-			//stopAnimation(true);
+			// stopAnimation(true);
 		}
 	};
 
@@ -67,8 +67,8 @@ function loadPaths() {
 	      property: "when",
 	      value: 240000,
 	  }),
-	  symbolizer: {pointRadius: 10, fillColor: "red",
-	               fillOpacity: 0.1, strokeColor: "red"}
+	  symbolizer: {pointRadius: 10, fillColor: "purple",
+	               fillOpacity: 0.1, strokeColor: "purple"}
 	});
 
 	var ruleOrange = new OpenLayers.Rule({
@@ -77,8 +77,8 @@ function loadPaths() {
 	      property: "when",
 	      value: 240000,
 	  }),
-	  symbolizer: {pointRadius: 10, fillColor: "orange",
-	               fillOpacity: 0.1, strokeColor: "orange"}
+	  symbolizer: {pointRadius: 10, fillColor: "blue",
+	               fillOpacity: 0.1, strokeColor: "blue"}
 	});
 	
 	var ruleYellow = new OpenLayers.Rule({
@@ -87,8 +87,8 @@ function loadPaths() {
 		      property: "when",
 		      value: 480000,
 		  }),
-		  symbolizer: {pointRadius: 10, fillColor: "yellow",
-		               fillOpacity: 0.1, strokeColor: "yellow"}
+		  symbolizer: {pointRadius: 10, fillColor: "green",
+		               fillOpacity: 0.1, strokeColor: "green"}
 		});
 
 	pathStyle.addRules([ruleRed, ruleOrange, ruleYellow]);
@@ -99,28 +99,28 @@ function loadPaths() {
 
 		protocol : new OpenLayers.Protocol.HTTP({
 			// url: "paths_wgs84.geojson",
-			//url : "/service/agent-paths/285752.0/5824386.0",
+			// url : "/service/agent-paths/285752.0/5824386.0",
 			url : "/service/agent-paths/" + easting + "/" + northing,
 			format : new OpenLayers.Format.GeoJSON()
 		}),
 		styleMap : new OpenLayers.StyleMap({
 			"default" : pathStyle
-//			"default" : new OpenLayers.Style({
-//				graphicName : "circle",
-//				pointRadius : 10,
-//				fillOpacity : 0.5,
-//				fillColor : "#9e69e3",
-//				strokeColor : "#8e45ed",
-//				strokeWidth : 1
-//			})
+// "default" : new OpenLayers.Style({
+// graphicName : "circle",
+// pointRadius : 10,
+// fillOpacity : 0.5,
+// fillColor : "#9e69e3",
+// strokeColor : "#8e45ed",
+// strokeWidth : 1
+// })
 		}),
 		renderers : [ "Canvas", "SVG", "VML" ]
 	});
 
 	map.addLayer(paths);
-	//alert("Loaded Paths");
-//	map.setCenter(new OpenLayers.LonLat(144.570412433435773, -37.701804450869475)
-//	.transform(geographic, mercator), 16);
+	// alert("Loaded Paths");
+// map.setCenter(new OpenLayers.LonLat(144.570412433435773, -37.701804450869475)
+// .transform(geographic, mercator), 16);
 
 }
 function showValue(newValue, spanId)
@@ -132,43 +132,45 @@ function showValue(newValue, spanId)
 document.getElementById("simulate").onclick = loadPaths;
 document.getElementById("play").onclick = startAnimation;
 document.getElementById("pause").onclick = stopAnimation;
-//document.getElementById("slider").onchange = showValue;
+// document.getElementById("slider").onchange = showValue;
 
 
 var mercator = new OpenLayers.Projection("EPSG:900913");
 var geographic = new OpenLayers.Projection("EPSG:4326");
 var vicgrid = new OpenLayers.Projection("EPSG:28355");
-//var victorian = new OpenLayers.Projection("EPSG:28355");
+// var victorian = new OpenLayers.Projection("EPSG:28355");
 var controls = [new OpenLayers.Control.LayerSwitcher(), new OpenLayers.Control.Zoom()];
 map = new OpenLayers.Map("map", {controls : controls});
 
 var osm = new OpenLayers.Layer.OSM();
 
-//var paths_static = new OpenLayers.Layer.Vector("Paths Buffer", {
-//	projection : geographic,
-//	strategies: [new OpenLayers.Strategy.BBOX()],
-//	//strategies: [new OpenLayers.Strategy.Fixed(),new OpenLayers.Strategy.BBox()],
-//	protocol : new OpenLayers.Protocol.HTTP({
-//		url : "/paths_buffer_wgs84.geojson",
-//		format : new OpenLayers.Format.GeoJSON()
-//	}),
-//	styleMap : new OpenLayers.StyleMap({
-//		"default" : new OpenLayers.Style({
-//			graphicName : "circle",
-//			pointRadius : 10,
-//			fillOpacity : 0.25,
-//			fillColor : "#4de800",
-//			strokeColor : "#02aa21",
-//			strokeWidth : 1
-//		})
-//	}),
-//	renderers : [ "Canvas", "SVG", "VML" ]
-//});
+// var paths_static = new OpenLayers.Layer.Vector("Paths Buffer", {
+// projection : geographic,
+// strategies: [new OpenLayers.Strategy.BBOX()],
+// //strategies: [new OpenLayers.Strategy.Fixed(),new
+// OpenLayers.Strategy.BBox()],
+// protocol : new OpenLayers.Protocol.HTTP({
+// url : "/paths_buffer_wgs84.geojson",
+// format : new OpenLayers.Format.GeoJSON()
+// }),
+// styleMap : new OpenLayers.StyleMap({
+// "default" : new OpenLayers.Style({
+// graphicName : "circle",
+// pointRadius : 10,
+// fillOpacity : 0.25,
+// fillColor : "#4de800",
+// strokeColor : "#02aa21",
+// strokeWidth : 1
+// })
+// }),
+// renderers : [ "Canvas", "SVG", "VML" ]
+// });
 
 var roads = new OpenLayers.Layer.Vector("Roads", {
 	projection : geographic,
 	strategies: [new OpenLayers.Strategy.BBOX()],
-	//strategies: [new OpenLayers.Strategy.Fixed(),new OpenLayers.Strategy.BBox()],
+	// strategies: [new OpenLayers.Strategy.Fixed(),new
+	// OpenLayers.Strategy.BBox()],
 	protocol : new OpenLayers.Protocol.HTTP({
 		url : "/graph_wgs84.geojson",
 		format : new OpenLayers.Format.GeoJSON()
@@ -211,18 +213,28 @@ OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
 
     trigger: function(e) {
     	map.g
-        var lonlat = (map.getLonLatFromPixel(e.xy)); //.transform(mercator,geographic);
+        var lonlat = (map.getLonLatFromPixel(e.xy)); // .transform(mercator,geographic);
         easting = lonlat.lon;
         northing = lonlat.lat;
-        alert("You clicked near " + lonlat.lat + " N, " +
-                                  + lonlat.lon + " E");
+//        alert("You clicked near " + lonlat.lat + " N, " +
+//                                  + lonlat.lon + " E");
     }
 
 });
-
-map.addLayers([roads, osm])
+vectors = new OpenLayers.Layer.Vector("Vector Layer", {
+    renderers: [ "Canvas", "SVG", "VML" ]
+});
+    pointControl = new OpenLayers.Control.DrawFeature(vectors,OpenLayers.Handler.Point);
+    
+//    for(var key in controls) {
+//        map.addControl(controls[key]);
+//    }
+ 
+map.addLayers([roads, osm, vectors])
 map.setCenter(new OpenLayers.LonLat(144.570412433435773, -37.701804450869475)
 		.transform(geographic, mercator), 16);
 var click = new OpenLayers.Control.Click();
 map.addControl(click);
+map.addControl(pointControl);
+pointControl.activate();
 click.activate();
