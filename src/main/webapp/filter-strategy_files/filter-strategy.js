@@ -67,8 +67,8 @@ function loadPaths() {
 	      property: "when",
 	      value: 240000,
 	  }),
-	  symbolizer: {pointRadius: 10, fillColor: "purple",
-	               fillOpacity: 0.1, strokeColor: "purple"}
+	  symbolizer: {pointRadius: 10, fillColor: "red",
+	               fillOpacity: 0.1, strokeColor: "red", strokeOpacity: 0.1}
 	});
 
 	var ruleOrange = new OpenLayers.Rule({
@@ -77,8 +77,8 @@ function loadPaths() {
 	      property: "when",
 	      value: 240000,
 	  }),
-	  symbolizer: {pointRadius: 10, fillColor: "blue",
-	               fillOpacity: 0.1, strokeColor: "blue"}
+	  symbolizer: {pointRadius: 10, fillColor: "orange",
+	               fillOpacity: 0.1, strokeColor: "orange", strokeOpacity: 0.1}
 	});
 	
 	var ruleYellow = new OpenLayers.Rule({
@@ -87,8 +87,8 @@ function loadPaths() {
 		      property: "when",
 		      value: 480000,
 		  }),
-		  symbolizer: {pointRadius: 10, fillColor: "green",
-		               fillOpacity: 0.1, strokeColor: "green"}
+		  symbolizer: {pointRadius: 10, fillColor: "yellow",
+		               fillOpacity: 0.1, strokeColor: "yellow", strokeOpacity: 0.1}
 		});
 
 	pathStyle.addRules([ruleRed, ruleOrange, ruleYellow]);
