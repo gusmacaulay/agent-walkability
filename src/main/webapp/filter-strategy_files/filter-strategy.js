@@ -232,7 +232,7 @@ vectors = new OpenLayers.Layer.Vector("Vector Layer", {
  
 map.addLayers([roads, osm, vectors])
 map.setCenter(new OpenLayers.LonLat(144.570412433435773, -37.701804450869475)
-		.transform(geographic, mercator), 16);
+		.transform(geographic, mercator), 15);
 var click = new OpenLayers.Control.Click();
 map.addControl(click);
 map.addControl(pointControl);

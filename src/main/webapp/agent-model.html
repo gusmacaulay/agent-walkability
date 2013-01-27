@@ -13,7 +13,8 @@
 <link rel="stylesheet" href="filter-strategy_files/style_002.css"
 	type="text/css">
 <script src="filter-strategy_files/OpenLayers.js"></script>
-<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
 <script>
 	OpenLayers.ImgPath = "filter-strategy_files/";
 </script>
@@ -27,88 +28,81 @@ body {
 	padding-top: 20px;
 	padding-bottom: 40px;
 }
-
-/* Custom container */
-.container-narrow {
-	margin: 0 auto;
-	max-width: 700px;
-}
-
-.container-narrow>hr {
-	margin: 30px 0;
-}
 </style>
 </head>
 <body>
-	  <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="#">Agent Walkability</a>
-          <div class="nav-collapse collapse">
-            <ul class="nav">
-              <li class="active"><a href="#">Simulation</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-<!--               <li class="dropdown"> -->
-<!--                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a> -->
-<!--                 <ul class="dropdown-menu"> -->
-<!--                   <li><a href="#">Action</a></li> -->
-<!--                   <li><a href="#">Another action</a></li> -->
-<!--                   <li><a href="#">Something else here</a></li> -->
-<!--                   <li class="divider"></li> -->
-<!--                   <li class="nav-header">Nav header</li> -->
-<!--                   <li><a href="#">Separated link</a></li> -->
-<!--                   <li><a href="#">One more separated link</a></li> -->
-<!--                 </ul> -->
-<!--               </li> -->
-            </ul>
-<!--             <form class="navbar-form pull-right"> -->
-<!--               <input class="span2" type="text" placeholder="Email"> -->
-<!--               <input class="span2" type="password" placeholder="Password"> -->
-<!--               <button type="submit" class="btn">Sign in</button> -->
-<!--             </form> -->
-          </div><!--/.nav-collapse -->
-        </div>
-      </div>
-    </div>
-	
-	<div class="container">
-	<div class="hero-unit">
-		<h2>Agent Based Walkability Model</h2>
-		<h2 id="clock" class="lead pull-right">Time:</h2>
-		<div id="tags">filter, strategy, strategies, kml, advanced</div>
-		<p id="shortdesc">An animated visualisation of Agent Based
-			Walkability</p>
 
-		<i>Maximum Walking Time</i> <input id="walkingTimeSlider" type="range"
-			min="1" max="30" value="0" step="1"
-			onChange="showValue(this.value,'walkingTime');" /> <span
-			id="walkingTime">0</span> <i>Minutes</i><br> <i>Walking
-			Speed</i> <input id="walkingSpeedSlider" type="range" min="1" max="10"
-			value="4" step="1" onChange="showValue(this.value,'walkingSpeed');" />
-		<span id="walkingSpeed">0</span> <i>m/s</i><br> <i>Maximum
-			Distance</i> <input id="distanceSlider" type="range" min="0" max="2000"
-			value="1600" step="50" onChange="showValue(this.value,'distance');" />
-		<span id="distance">0</span> <i>Metres</i><br>
-		<ul class="nav nav-pills">
-			<input class="btn btn-large btn-success" id="simulate"
-				value="Simulate" type="button">
-			<input class="btn btn-large btn-success" id="play" value="Play" type="button">
-			<input class="btn btn-large btn-success" id="pause" value="Pause" type="button">
-			<input class="btn btn-primary btn-large pull-right"  value="Download">
-		</ul>
-		
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<a class="btn btn-navbar" data-toggle="collapse"
+					data-target=".nav-collapse"> <span class="icon-bar"></span> <span
+					class="icon-bar"></span> <span class="icon-bar"></span>
+				</a> <a class="brand" href="#">Agent Walkability</a>
+				<div class="nav-collapse collapse">
+					<ul class="nav">
+						<li class="active"><a href="#">Simulation</a></li>
+						<li><a href="#about">About</a></li>
+						<li><a href="#contact">Contact</a></li>
+						<!--               <li class="dropdown"> -->
+						<!--                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a> -->
+						<!--                 <ul class="dropdown-menu"> -->
+						<!--                   <li><a href="#">Action</a></li> -->
+						<!--                   <li><a href="#">Another action</a></li> -->
+						<!--                   <li><a href="#">Something else here</a></li> -->
+						<!--                   <li class="divider"></li> -->
+						<!--                   <li class="nav-header">Nav header</li> -->
+						<!--                   <li><a href="#">Separated link</a></li> -->
+						<!--                   <li><a href="#">One more separated link</a></li> -->
+						<!--                 </ul> -->
+						<!--               </li> -->
+					</ul>
+					<!--             <form class="navbar-form pull-right"> -->
+					<!--               <input class="span2" type="text" placeholder="Email"> -->
+					<!--               <input class="span2" type="password" placeholder="Password"> -->
+					<!--               <button type="submit" class="btn">Sign in</button> -->
+					<!--             </form> -->
+				</div>
+				<!--/.nav-collapse -->
+			</div>
+		</div>
 	</div>
-	<div id="map" class="largemap olMap"></div>
-	
-	<!--<div class="olMapViewport olControlDragPanActive olControlZoomBoxActive olControlPinchZoomActive olControlNavigationActive" style="position: relative; overflow: hidden; width: 100%; height: 100%;" id="OpenLayers_Map_2_OpenLayers_ViewPort"><div style="position: absolute; z-index: 749; left: 0px; top: 0px;" id="OpenLayers_Map_2_OpenLayers_Container"><div class="olLayerDiv olLayerGrid" dir="ltr" style="position: absolute; width: 100%; height: 100%; z-index: 100;" id="OpenLayers_Layer_OSM_18"><img src="filter-strategy_files/92.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 84px; top: 63px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/91.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 84px; top: -193px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/92_003.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 340px; top: 63px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/91_003.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: 340px; top: -193px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/92_002.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: -172px; top: 63px; width: 256px; height: 256px;" class="olTileImage"><img src="filter-strategy_files/91_002.png" crossorigin="anonymous" style="visibility: inherit; opacity: 1; position: absolute; left: -172px; top: -193px; width: 256px; height: 256px;" class="olTileImage"></div><div class="olLayerDiv" dir="ltr" style="position: absolute; width: 100%; height: 100%; z-index: 330; left: 0px; top: 0px;" id="OpenLayers_Layer_Vector_25"><canvas height="256" width="512" style="width: 512px; height: 256px; visibility: visible;"></canvas></div></div><div unselectable="on" class="olControlZoom olControlNoSelect" style="position: absolute; z-index: 1004;" id="OpenLayers_Control_Zoom_5"><a class="olControlZoomIn olButton" href="#zoomIn">+</a><a class="olControlZoomOut olButton" href="#zoomOut">−</a></div><div unselectable="on" class="olControlArgParser olControlNoSelect" style="position: absolute; z-index: 1004;" id="OpenLayers_Control_ArgParser_6"></div><div unselectable="on" class="olControlAttribution olControlNoSelect" style="position: absolute; z-index: 1004;" id="OpenLayers_Control_Attribution_7">© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</div></div></div> -->
-		
+
+	<div class="container">
+		<div class="hero-unit">
+			<h2>Agent Based Walkability Model</h2>
+			<h2 id="clock" class="lead pull-right">Time: 00m : 00s</h2>
+			<div id="tags">filter, strategy, strategies, kml, advanced</div>
+			<p id="shortdesc">An animated visualisation of Agent Based
+				Walkability</p>
+
+			<i>Maximum Walking Time</i> <input id="walkingTimeSlider"
+				type="range" min="1" max="30" value="0" step="1"
+				onChange="showValue(this.value,'walkingTime');" /> <span
+				id="walkingTime">0</span> <i>Minutes</i><br> <i>Walking
+				Speed</i> <input id="walkingSpeedSlider" type="range" min="1" max="10"
+				value="4" step="1" onChange="showValue(this.value,'walkingSpeed');" />
+			<span id="walkingSpeed">0</span> <i>m/s</i><br> <i>Maximum
+				Distance</i> <input id="distanceSlider" type="range" min="0" max="2000"
+				value="1600" step="50" onChange="showValue(this.value,'distance');" />
+			<span id="distance">0</span> <i>Metres</i><br>
+			<ul class="nav nav-pills">
+				<input class="btn btn-large btn-success" id="simulate"
+					value="Simulate" type="button">
+				<input class="btn btn-large btn-success" id="play" value="Play"
+					type="button">
+				<input class="btn btn-large btn-success" id="pause" value="Pause"
+					type="button">
+				<input class="btn btn-primary btn-large pull-right" value="Download">
+			</ul>
+
+		</div>
 	</div>
+	<!-- container -->
+	<div class="container">
+		<div id="map" class="largemap olMap"></div>
+	</div>
+
 	<script src="http://code.jquery.com/jquery-latest.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="filter-strategy_files/filter-strategy.js"></script>
