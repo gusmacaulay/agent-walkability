@@ -336,11 +336,10 @@ function initWFSTools() {
 		})
 	});
 
-	
 	wfs = new OpenLayers.Layer.Vector(
 			"Editable Roads",
 			{
-				strategies : [ new OpenLayers.Strategy.BBOX(), saveStrategy],
+				strategies : [ new OpenLayers.Strategy.BBOX(), saveStrategy ],
 				projection : mercator,
 				styleMap : styles,
 				protocol : new OpenLayers.Protocol.WFS(
@@ -445,7 +444,25 @@ function init() {
 
 	map.addLayers([ osm, vectors ])
 	initWFSTools();
-	map.addLayers([ wfs ])
+	destinations = new OpenLayers.Layer.WMS("Destinations", "http://localhost:8081/geoserver/walkability/wms", {
+		LAYERS : 'walkability:random_destinations',
+		srsName : "EPSG:900913",
+		STYLES : '',
+		format : 'image/png',
+		tiled : true,
+		transparent : true,
+		tilesOrigin : map.maxExtent.left + ',' + map.maxExtent.bottom
+	}, {
+		buffer : 0,
+		displayOutsideMaxExtent : true,
+		reproject : true
+//		yx : {
+//			'EPSG:900913' : false
+//		}
+	});
+	destinations.setIsBaseLayer(false);
+	// estinations.isBaseLayer(false);
+	map.addLayers([ wfs, destinations ])
 	setControls();
 	map.setCenter(new OpenLayers.LonLat(16093371, -4537265), 15);
 	// map.setCenter(new OpenLayers.LonLat(144.570412433435773,
