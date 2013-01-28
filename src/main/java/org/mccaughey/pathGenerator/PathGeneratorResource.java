@@ -55,12 +55,12 @@ public class PathGeneratorResource {
   @RequestMapping(value = "/{easting}/{northing}", method = RequestMethod.GET)
   public void getPaths(HttpServletResponse response, @PathVariable String easting, @PathVariable String northing) throws Exception {
     // Hardcoded inputs for now
-    File networkShapeFile = new File("src/test/resources/graph.shp");
-    FileDataStore networkDataStore = FileDataStoreFinder
-        .getDataStore(networkShapeFile);
-    SimpleFeatureSource networkSource = networkDataStore.getFeatureSource();
+//    File networkShapeFile = new File("src/test/resources/graph.shp");
+//    FileDataStore networkDataStore = FileDataStoreFinder
+//        .getDataStore(networkShapeFile);
+//    SimpleFeatureSource networkSource = networkDataStore.getFeatureSource();
     
-    networkSource = getDataSource("walkability:melton_roads_sample");
+    SimpleFeatureSource networkSource = getDataSource("walkability:melton_roads_sample");
     //
     File destinationsFile = new File("src/test/resources/random_destinations.shp");
     FileDataStore destinationsDataStore = FileDataStoreFinder
