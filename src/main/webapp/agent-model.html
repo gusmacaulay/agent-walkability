@@ -130,15 +130,21 @@ body {
 				Walkability</p>
 
 			<i>Maximum Walking Time</i> <input id="walkingTimeSlider"
-				type="range" min="1" max="30" value="0" step="1"
+				type="range" min="1" max="30" value="20" step="1"
 				onChange="showValue(this.value,'walkingTime');" /> <span
-				id="walkingTime">0</span> <i>Minutes</i><br> <i>Walking
+				id="walkingTime">20</span> <i>Minutes</i><br> <i>Walking
 				Speed</i> <input id="walkingSpeedSlider" type="range" min="1" max="10"
-				value="4" step="1" onChange="showValue(this.value,'walkingSpeed');" />
-			<span id="walkingSpeed">0</span> <i>m/s</i><br> <i>Maximum
+				value="1.33" step="1" onChange="showValue(this.value,'walkingSpeed');" />
+			<span id="walkingSpeed">1.33</span> <i>m/s</i><br> <i>Maximum
 				Distance</i> <input id="distanceSlider" type="range" min="0" max="2000"
 				value="1600" step="50" onChange="showValue(this.value,'distance');" />
-			<span id="distance">0</span> <i>Metres</i><br>
+			<span id="distance">1600</span> <i>Metres</i><br>
+			
+			<i>Intersection Wait Time</i> <input id="waitingTimeSlider"
+				type="range" min="5" max="60" value="30" step="5"
+				onChange="showValue(this.value,'waitTime');" /> <span
+				id="waitTime">30</span> <i>Seconds</i><br>
+			
 			<ul class="nav nav-pills">
 				<input class="btn btn-large btn-success" id="simulate"
 					value="Simulate" type="button">
