@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
+import org.geotools.data.FeatureSource;
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -58,17 +58,16 @@ public class PathGeneratorResource {
     File networkShapeFile = new File("src/test/resources/graph.shp");
     FileDataStore networkDataStore = FileDataStoreFinder
         .getDataStore(networkShapeFile);
-    //System.out.println(networkDataStore.getInfo().toString());
     SimpleFeatureSource networkSource = networkDataStore.getFeatureSource();
-//    
-//    SimpleFeatureSource networkSource = getDataSource("shireofmelton:footpaths_meltons");
+    
+    networkSource = getDataSource("walkability:melton_roads_sample");
     //
     File destinationsFile = new File("src/test/resources/random_destinations.shp");
     FileDataStore destinationsDataStore = FileDataStoreFinder
         .getDataStore(destinationsFile);
     SimpleFeatureIterator features = destinationsDataStore.getFeatureSource()
         .getFeatures().features();
-    List<Point> destinations = new ArrayList();
+    List<Point> destinations = new ArrayList<Point>();
     while (features.hasNext()) {
       SimpleFeature feature = features.next();
       destinations.add((Point) feature.getDefaultGeometry());
@@ -99,25 +98,29 @@ public class PathGeneratorResource {
   }
   
   private SimpleFeatureSource getDataSource(String typeName) throws IOException {
-      String getCapabilities = "http://localhost:8080/geoserver/wfs?REQUEST=GetCapabilities";
+      String getCapabilities = "http://localhost:8080/geoserver/ows?service=wfs&version=1.0.0&request=GetCapabilities";
 //    String getCapabilitiesWFS = env.getProperty("wfs.url");
     //	"getfeature&typename=shireofmelton:footpaths_meltons";
 
-    Map connectionParameters = new HashMap();
+    Map<String, String> connectionParameters = new HashMap<String, String>();
     connectionParameters.put("WFSDataStoreFactory:GET_CAPABILITIES_URL", getCapabilities);
 
     // Step 2 - connection
-    DataStore data = DataStoreFinder.getDataStore( connectionParameters );
-    LOGGER.debug(data.toString());
-    // Step 3 - discouvery
-    String typeNames[] = data.getTypeNames();
-    
-    SimpleFeatureType schema = data.getSchema( typeNames[0] );
+    DataStore wfsStore = DataStoreFinder.getDataStore( connectionParameters );
+    if (wfsStore == null)
+	LOGGER.info("Null Data Store");
+    String typeNames[] = wfsStore.getTypeNames();
+    LOGGER.info(typeNames[0]);
+    //typeName = typeNames[0];
+    SimpleFeatureType schema = wfsStore.getSchema( typeName );
 
     // Step 4 - target
-    SimpleFeatureSource source = data.getFeatureSource( typeNames[0] );
-   
+    SimpleFeatureSource source = wfsStore.getFeatureSource( typeName );
+    System.out.println( "Metadata Bounds:"+ source.getBounds() );
+    LOGGER.debug(wfsStore.toString());
+  
     return source;
+    //return source;
 
   }
 }
