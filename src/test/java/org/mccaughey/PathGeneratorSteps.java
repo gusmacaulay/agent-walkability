@@ -13,6 +13,7 @@ import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureCollections;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.geojson.feature.FeatureJSON;
@@ -22,6 +23,7 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.embedder.Embedder;
+import org.mccaughey.geotools.util.Pair;
 import org.mccaughey.pathGenerator.PathGenerator;
 import org.opengis.feature.simple.SimpleFeature;
 
@@ -95,7 +97,9 @@ public class PathGeneratorSteps extends Embedder {
 
   @When("the path generator is asked for the shortest path/s")
   public void requestShortestPath() throws Exception {
-    paths = pathGenerator.shortestPaths(networkSource, start, destinations, new File("all_path_nodes_test.json"));
+	  Pair<List<Path>,FeatureCollection> p =pathGenerator.shortestPaths(networkSource, start, destinations, new File("all_path_nodes_test.json"));
+      paths =p.getOne();
+    
     // Assert.assertTrue(true);
   }
 

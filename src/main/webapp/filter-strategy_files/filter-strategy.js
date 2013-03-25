@@ -48,7 +48,28 @@ function stopAnimation(reset) {
 	}
 }
 
+function downloadOutput() {
+	window.open("/agent-walkability/service/agent-paths/downloadGeneratedOutputAzShpZip");
+	
+}
 function loadPaths() {
+	if (!easting||!northing){
+		$( "#dialog" ).dialog({
+		      modal: true,
+		      buttons: {
+		        Ok: function() {
+		          $( this ).dialog( "close" );
+		        }
+		      }
+		    });
+			return;	
+			
+	}
+	document.getElementById('simulation_status').innerHTML="Simulation is running ...";	
+	document.getElementById('play').disabled="disabled";
+	document.getElementById('pause').disabled="disabled";
+	document.getElementById('download').disabled="disabled";
+	
 	filter = new OpenLayers.Filter.Comparison({
 		type : OpenLayers.Filter.Comparison.BETWEEN,
 		property : "when",
@@ -116,8 +137,13 @@ function loadPaths() {
 		protocol : new OpenLayers.Protocol.HTTP({
 			// url: "paths_wgs84.geojson",
 			// url : "/service/agent-paths/285752.0/5824386.0",
-			url : "/service/agent-paths/" + easting + "/" + northing,
-			format : new OpenLayers.Format.GeoJSON()
+			 
+			url : "/agent-walkability/service/agent-paths/" + easting + "/" + northing,
+			format : new OpenLayers.Format.GeoJSON(),			 
+			//,
+			//params:{'ff':'dd'}
+			
+			 
 		}),
 		styleMap : new OpenLayers.StyleMap({
 			"default" : pathStyle
@@ -133,6 +159,20 @@ function loadPaths() {
 		renderers : [ "Canvas", "SVG", "VML" ]
 	});
 
+	paths.events.register("loadend", paths, function(a) {
+		if(!a.response.features||a.response.features.length==0){			 
+			document.getElementById('simulation_status').innerHTML="Generated output is empty";	
+			
+		}else {
+			document.getElementById('simulation_status').innerHTML="Simulation is completed";	
+			document.getElementById('play').disabled="";
+			document.getElementById('pause').disabled="";
+			document.getElementById('download').disabled="";
+		}
+		//
+     });
+
+	
 	map.addLayer(paths);
 	// alert("Loaded Paths");
 	// map.setCenter(new OpenLayers.LonLat(144.570412433435773,
@@ -148,6 +188,7 @@ function showValue(newValue, spanId) {
 document.getElementById("simulate").onclick = loadPaths;
 document.getElementById("play").onclick = startAnimation;
 document.getElementById("pause").onclick = stopAnimation;
+document.getElementById("download").onclick = downloadOutput;
 // document.getElementById("slider").onchange = showValue;
 
 var mercator = new OpenLayers.Projection("EPSG:900913");
@@ -346,11 +387,11 @@ function initWFSTools() {
 						{
 							version : "1.1.0",
 							srsName : "EPSG:900913",
-							url : "http://localhost:8081/geoserver/wfs",
+							url : "/agent-walkability/geoserver/wfs",
 							// featureNS : "walkability",
 							featureType : "melton_roads_sample",
-							geometryName : "the_geom",
-							schema : "http://localhost:8081/geoserver/wfs/DescribeFeatureType?version=1.1.0&typename=walkability:melton_roads_sample"
+							geometryName : "geom",
+							schema : "/agent-walkability/geoserver/wfs/DescribeFeatureType?version=1.1.0&typename=CSDILA_local:melton_roads_sample"
 						})
 			});
 	//       
@@ -444,8 +485,8 @@ function init() {
 
 	map.addLayers([ osm, vectors ])
 	initWFSTools();
-	destinations = new OpenLayers.Layer.WMS("Destinations", "http://localhost:8081/geoserver/walkability/wms", {
-		LAYERS : 'walkability:random_destinations',
+	destinations = new OpenLayers.Layer.WMS("Destinations", "/agent-walkability/geoserver/wms", {
+		LAYERS : 'CSDILA_local:random_destinations',
 		srsName : "EPSG:900913",
 		STYLES : '',
 		format : 'image/png',

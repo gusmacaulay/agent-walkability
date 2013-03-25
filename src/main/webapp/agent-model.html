@@ -80,8 +80,10 @@ body {
             background-repeat: no-repeat;
             background-position: 0px 1px;
         }
-        
+       
 </style>
+ <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css" />
+ 
 </head>
 <body>
 
@@ -148,12 +150,14 @@ body {
 			<ul class="nav nav-pills">
 				<input class="btn btn-large btn-success" id="simulate"
 					value="Simulate" type="button">
-				<input class="btn btn-large btn-success" id="play" value="Play"
-					type="button">
-				<input class="btn btn-large btn-success" id="pause" value="Pause"
-					type="button">
-				<input class="btn btn-primary btn-large pull-right" value="Download">
+				<input class=" btn btn-large btn-success" id="play" value="Play"
+					type="button" disabled >
+				<input class=" btn btn-large btn-success" id="pause" value="Pause"
+					type="button" disabled >
+				<input class=" btn btn-primary btn-large pull-right"  id="download" value="Download" disabled>
 			</ul>
+			<span id="simulation_status">Simulation is not started</span>
+			 
 
 		</div>
 	</div>
@@ -163,13 +167,16 @@ body {
 	</div>
 
 	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	
 	<script src="js/bootstrap.min.js"></script>
 	<script src="filter-strategy_files/filter-strategy.js"></script>
+	
 	<!-- 		<script type="text/javascript" src="filter-strategy_files/heatmap.js"></script> -->
 	<!-- 		<script type="text/javascript" -->
 	<!-- 			src="filter-strategy_files/heatmap-openlayers.js"></script> -->
 	
-    
+    <div id="dialog" title="Notice">To begin, select an origin in the map</div>
     
 </body>
 </html>
