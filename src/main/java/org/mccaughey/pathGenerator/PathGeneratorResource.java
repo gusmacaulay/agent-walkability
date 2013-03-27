@@ -2,36 +2,25 @@ package org.mccaughey.pathGenerator;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.servlets.ProxyServlet;
-import org.eclipse.jetty.servlets.ProxyServlet.Transparent;
 import org.geotools.data.DataStore;
-import org.geotools.data.DataStoreFinder;
 import org.geotools.data.DefaultQuery;
 import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.feature.FeatureCollection;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.graph.path.Path;
 import org.geotools.referencing.CRS;
-import org.mccaughey.geotools.util.Pair;
 import org.mccaughey.geotools.util.ShapeFile;
 import org.mccaughey.pathGenerator.config.LayerMapping;
 import org.mccaughey.service.impl.WFSDataStoreFactoryImpl;
 import org.mccaughey.util.TemporaryFileManager;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.slf4j.Logger;
@@ -39,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 

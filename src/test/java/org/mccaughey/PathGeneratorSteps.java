@@ -100,7 +100,7 @@ public class PathGeneratorSteps extends Embedder {
 	  List<Path> paths = PathGenerator.shortestPaths(networkSource, start, destinations);//, new File("all_path_nodes_test.json"));
       //paths =p.getOne();
     
-	  Assert.assertTrue(paths != null);
+	  Assert.assertTrue(paths.size() > 0);
   }
 
   @Then("the correct shortest path/s will be provided")

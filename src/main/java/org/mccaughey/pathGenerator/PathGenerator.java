@@ -6,17 +6,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.geotools.data.DataUtilities;
-import org.geotools.data.DefaultQuery;
 import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.store.ReprojectingFeatureCollection;
-import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geojson.feature.FeatureJSON;
@@ -30,12 +27,10 @@ import org.geotools.graph.traverse.standard.AStarIterator.AStarFunctions;
 import org.geotools.graph.traverse.standard.AStarIterator.AStarNode;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.mccaughey.geotools.util.Pair;
 import org.mccaughey.pathGenerator.config.LayerMapping;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +48,6 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import com.vividsolutions.jts.linearref.LinearLocation;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
-import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 
 public class PathGenerator {
 
@@ -76,7 +70,7 @@ public class PathGenerator {
 
 		Query query = new Query(LayerMapping.ROAD_SAMPLE_LAYER);
 		query.setCoordinateSystem(CRS.decode("EPSG:28355")); // FROM
-		// query.setCoordinateSystem( CRS.decode("EPSG:4283") ); // FROM
+		//query.setCoordinateSystem( CRS.decode("EPSG:4283") ); // FROM
 		// query.setCoordinateSystemReproject( CRS.decode("EPSG:28355") ); // TO
 
 		//
@@ -84,11 +78,12 @@ public class PathGenerator {
 				.getFeatures(query);
 		List<LineString> lines = nodeIntersections(networkSimpleFeatureCollection);
 
+		LOGGER.info("FEATURES: {}", networkSimpleFeatureCollection.size());
 		// Build a graph with all the destinations connected
 		LineStringGraphGenerator lineStringGen = createGraphWithAdditionalNodes(
 				lines, start, destinations);
 		Graph graph = lineStringGen.getGraph();
-		// LOGGER.info("GRAPH: " + graph);
+		LOGGER.info("GRAPH: " + graph);
 		//writeNetworkFromEdges(graph.getEdges(), networkSource.getSchema());
 
 		Node startNode = lineStringGen.getNode(start.getCoordinate());
@@ -98,6 +93,7 @@ public class PathGenerator {
 
 			try {
 				Node endNode = lineStringGen.getNode(end.getCoordinate());
+				//LOGGER.info("Attempting path calculation");
 				if (endNode != null) {
 					LOGGER.info("Start Node: " + startNode.toString());
 					LOGGER.info("End Node: " + endNode.toString());
