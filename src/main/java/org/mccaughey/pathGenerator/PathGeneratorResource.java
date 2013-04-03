@@ -17,6 +17,7 @@ import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.mccaughey.geotools.util.ShapeFile;
+import org.mccaughey.pathGenerator.config.ConnectionsInfo;
 import org.mccaughey.pathGenerator.config.LayerMapping;
 import org.mccaughey.service.impl.WFSDataStoreFactoryImpl;
 import org.mccaughey.util.TemporaryFileManager;
@@ -25,11 +26,14 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -39,6 +43,11 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 @Controller
 @RequestMapping("/agent-paths")
 public class PathGeneratorResource {
+	
+
+	@Autowired
+	public WFSDataStoreFactoryImpl wfsDataStoreFactoryImpl ;	
+	
 	static final Logger LOGGER = LoggerFactory
 			.getLogger(PathGeneratorResource.class);
 
@@ -60,8 +69,11 @@ public class PathGeneratorResource {
 		// .getDataStore(networkShapeFile);
 		// SimpleFeatureSource networkSource =
 		// networkDataStore.getFeatureSource();
-		request.getSession();
-		WFSDataStoreFactoryImpl wfsDataStoreFactoryImpl = new WFSDataStoreFactoryImpl();
+//		(new ConnectionsInfo()).getRESTPW() 
+		ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(request.getSession().getServletContext());
+		ConnectionsInfo connectionsInfo = (ConnectionsInfo) ctx.getBean(ConnectionsInfo.class);
+		
+		;
 		DataStore dataStore = wfsDataStoreFactoryImpl
 				.getDataStore(LayerMapping.RANDOM_DESTINATION_LAYER);
 		// SimpleFeatureSource networkSource =

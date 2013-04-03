@@ -43,29 +43,41 @@
 		<param-value>/WEB-INF/mvc-dispatcher-servlet.xml</param-value>
 	</context-param>
 
-
 	<servlet>
 		<servlet-name>GeoserverProxy</servlet-name>
-		<servlet-class>org.eclipse.jetty.servlets.ProxyServlet$Transparent</servlet-class>
-		
+		<servlet-class>org.mccaughey.proxy.servlet.ProxyServletWithAuth</servlet-class>
 		<init-param>
 			<param-name>ProxyTo</param-name>
-			<param-value>http://localhost:8080/geoserver</param-value>
+			<param-value>http://192.43.209.39:8080/geoserver</param-value>
 		</init-param>
+		<!--   <init-param>
+			<param-name>HostHeader</param-name>
+			<param-value>Basic YXVyaW46YXVyaW5hY2Nlc3M=</param-value>
+		</init-param>  -->
 		<init-param>
 			<param-name>Prefix</param-name>
 			<param-value>/geoserver</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-
 	<servlet-mapping>
 		<servlet-name>GeoserverProxy</servlet-name>
 		<url-pattern>/geoserver/*</url-pattern>
 	</servlet-mapping>
-	
+
+	<!-- <servlet> <servlet-name>HttpProxy_JRoller</servlet-name> <servlet-class>org.mccaughey.util.HttpProxy_JRoller</servlet-class> 
+		<init-param> <param-name>ProxyTo</param-name> <param-value>http://192.43.209.39:8080/geoserver</param-value> 
+		</init-param> <init-param> <param-name>Prefix</param-name> <param-value>/geoserver</param-value> 
+		</init-param> <init-param> <param-name>ProxyUserName</param-name> <param-value>aurinusername</param-value> 
+		</init-param> <init-param> <param-name>ProxyPassword</param-name> <param-value>aurinpasss</param-value> 
+		</init-param> </servlet> <servlet-mapping> <servlet-name>HttpProxy_JRoller</servlet-name> 
+		<url-pattern>/geoserver/*</url-pattern> </servlet-mapping> -->
+
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
+	<listener>
+		<listener-class>org.mccaughey.servlet.FileManagementListener</listener-class>
+	</listener>
 </web-app>

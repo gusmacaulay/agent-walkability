@@ -8,11 +8,16 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.servlets.ProxyServlet;
+import org.mccaughey.pathGenerator.config.ConnectionsInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * ProxyServletWithAuth Proxy.
@@ -28,7 +33,9 @@ import org.eclipse.jetty.servlets.ProxyServlet;
  */
 public   class ProxyServletWithAuth extends ProxyServlet
 {
-    String _prefix;
+	ConnectionsInfo connectionsInfo=null;
+  
+	String _prefix;
     String _proxyTo;
 
     public ProxyServletWithAuth()
@@ -109,8 +116,11 @@ public   class ProxyServletWithAuth extends ProxyServlet
     protected void customizeExchange(HttpExchange exchange, HttpServletRequest request)
     {
     	String digest = null;
-		String user="USER";
-		String password="PASSWORD";
+    	ConnectionsInfo connectionInfo = getConnectionsInfo(request.getSession());
+		String user=connectionInfo.getRESTUSER();
+		String password=connectionInfo.getRESTPW();
+//		String user="aurin";
+//		String password="aurinaccess";
 		if (user != null && password != null) {
 			digest = "Basic "
 					+ new String(
@@ -120,5 +130,16 @@ public   class ProxyServletWithAuth extends ProxyServlet
 		
     	  exchange.addRequestHeader("Authorization",  digest); 
     }
+    
+    public synchronized ConnectionsInfo getConnectionsInfo(HttpSession session) {
+		if (this.connectionsInfo == null) {
+			ApplicationContext ctx = WebApplicationContextUtils
+					.getWebApplicationContext(session
+							.getServletContext());
+			this.connectionsInfo = (ConnectionsInfo) ctx
+					.getBean(ConnectionsInfo.class);
+		}
+		return this.connectionsInfo;
+	}
     
 }

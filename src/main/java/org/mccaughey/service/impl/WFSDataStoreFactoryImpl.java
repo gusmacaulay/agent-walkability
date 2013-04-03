@@ -12,21 +12,25 @@ import org.geotools.data.DataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.wfs.WFSDataStoreFactory;
 import org.geotools.data.wfs.v1_1_0.WFS_1_1_0_DataStore;
+import org.mccaughey.pathGenerator.config.ConnectionsInfo;
 import org.mccaughey.service.DataStoreFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+@Service
 public class WFSDataStoreFactoryImpl implements DataStoreFactory {
 
 
+	@Autowired ConnectionsInfo connectionsInfo;
 	
-	private static final String USERNAME = "USER";
-	private static final String PASSWORD = "PASS";
 	private DataStore DSEDataStore = null;
 	private DataStore CSDILADataStore = null;
 	private DataStore NewCastleDataStore = null;
 	private WFS_1_1_0_DataStore wFS_1_1_0_DataStore = null;
 
 	@PreDestroy
-	public void dispose(){
+	public void dipose(){
 		DSEDataStore.dispose();
 		CSDILADataStore.dispose();
 	}
@@ -47,10 +51,10 @@ public class WFSDataStoreFactoryImpl implements DataStoreFactory {
 		
 		if (this.CSDILADataStore == null) {
 			Map<String, Object> dataStoreParams = new HashMap<String, Object>();
-			String getCapabilities = "http://192.43.209.39:8080/geoserver/ows?service=wfs&version=1.1.0&request=GetCapabilities";
+			String getCapabilities = connectionsInfo.getRESTURL()+"/ows?service=wfs&version=1.1.0&request=GetCapabilities";
 			dataStoreParams.put("WFSDataStoreFactory:GET_CAPABILITIES_URL",getCapabilities);
-			dataStoreParams.put("WFSDataStoreFactory:USERNAME", USERNAME);
-			dataStoreParams.put("WFSDataStoreFactory:PASSWORD",PASSWORD );
+			dataStoreParams.put("WFSDataStoreFactory:USERNAME", connectionsInfo.getRESTUSER());
+			dataStoreParams.put("WFSDataStoreFactory:PASSWORD" ,connectionsInfo.getRESTPW());
 			dataStoreParams.put(WFSDataStoreFactory.TIMEOUT.key, new Integer(18000000)); 			
 
 //			wFS_1_1_0_DataStore = (WFS_1_1_0_DataStore) DataStoreFinder.getDataStore(dataStoreParams);

@@ -10,7 +10,11 @@
         http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 
 	<context:component-scan base-package="org.mccaughey.pathGenerator" />
-
+	<context:component-scan base-package="org.mccaughey.pathGenerator.config" />
+	<context:component-scan base-package="org.mccaughey.service.impl" />
+	
+	<context:property-placeholder location="classpath:connections.properties" />
+	
 	<mvc:annotation-driven />
 
 	<bean
