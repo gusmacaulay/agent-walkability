@@ -1,5 +1,6 @@
 *.class
 non-free-data
+src/main/resources/connections.properties
 # Package Files #
 *.jar
 *.war
