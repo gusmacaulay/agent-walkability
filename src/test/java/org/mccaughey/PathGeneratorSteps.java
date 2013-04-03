@@ -13,7 +13,6 @@ import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureCollections;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.geojson.feature.FeatureJSON;
@@ -23,7 +22,6 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.embedder.Embedder;
-import org.mccaughey.geotools.util.Pair;
 import org.mccaughey.pathGenerator.PathGenerator;
 import org.opengis.feature.simple.SimpleFeature;
 
@@ -45,7 +43,7 @@ public class PathGeneratorSteps extends Embedder {
 
   @Given("a path generator")
   public void aPathGenerator() {
-    pathGenerator = new PathGenerator();
+   // pathGenerator = new PathGenerator();
   }
 
   @Given("a footpath network")

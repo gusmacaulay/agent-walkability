@@ -24,15 +24,13 @@ public class WFSDataStoreFactoryImpl implements DataStoreFactory {
 	@Autowired
 	ConnectionsInfo connectionsInfo;
 
-	private DataStore DSEDataStore = null;
-	private DataStore CSDILADataStore = null;
-	private DataStore NewCastleDataStore = null;
-	private WFS_1_1_0_DataStore wFS_1_1_0_DataStore = null;
+	private DataStore dataStoreDSE = null;
+	private DataStore dataStoreCSDILA = null;
 
 	@PreDestroy
 	public void dipose() {
-		DSEDataStore.dispose();
-		CSDILADataStore.dispose();
+		dataStoreDSE.dispose();
+		dataStoreCSDILA.dispose();
 	}
 
 	public SimpleFeatureSource getFeatureSource(String layerName)
@@ -49,26 +47,21 @@ public class WFSDataStoreFactoryImpl implements DataStoreFactory {
 	public DataStore getCSDILADataStore() throws IOException,
 			DataSourceException {
 
-		if (this.CSDILADataStore == null) {
+		if (this.dataStoreCSDILA == null) {
 			Map<String, Object> dataStoreParams = new HashMap<String, Object>();
-			String getCapabilities = connectionsInfo.getRESTURL()
+			String getCapabilities = connectionsInfo.getGeoserverURL()
 					+ "/ows?service=wfs&version=1.1.0&request=GetCapabilities";
 			dataStoreParams.put("WFSDataStoreFactory:GET_CAPABILITIES_URL",
 					getCapabilities);
 			dataStoreParams.put("WFSDataStoreFactory:USERNAME",
-					connectionsInfo.getRESTUSER());
+					connectionsInfo.getGeoserverUser());
 			dataStoreParams.put("WFSDataStoreFactory:PASSWORD",
-					connectionsInfo.getRESTPW());
+					connectionsInfo.getGeoserverPassword());
 			dataStoreParams.put(WFSDataStoreFactory.TIMEOUT.key, new Integer(
 					18000000));
-
-			// wFS_1_1_0_DataStore = (WFS_1_1_0_DataStore)
-			// DataStoreFinder.getDataStore(dataStoreParams);
-			CSDILADataStore = DataStoreFinder.getDataStore(dataStoreParams);
-			// CSDILADataStore).setMaxFeatures(10000);
+			dataStoreCSDILA = DataStoreFinder.getDataStore(dataStoreParams);
 		}
-		// return (WFS_1_1_0_DataStore)this.wFS_1_1_0_DataStore;
-		return CSDILADataStore;
+		return dataStoreCSDILA;
 	}
 
 	public DataStore getExportableDataStore() throws Exception {

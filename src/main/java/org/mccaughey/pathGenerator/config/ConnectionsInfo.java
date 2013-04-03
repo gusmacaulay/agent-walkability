@@ -7,25 +7,25 @@ import org.springframework.stereotype.Component;
 public class ConnectionsInfo {
 	
 	@Value("${geoserverRESTURL}") 
-	private String RESTURL; 
+	private String geoserverURL; 
 	
 
 	@Value("${geoserverRESTUSER}") 
-	private String RESTUSER; 
+	private String geoserverUSER; 
 	
 	@Value("${geoserverRESTPW}") 
-	private String RESTPW; 
+	private String geoserverPassword; 
 	
-	public String getRESTURL() {
-		return RESTURL;
+	public String getGeoserverURL() {
+		return geoserverURL;
 	}
 	
-	public String getRESTUSER() {
-		return RESTUSER;
+	public String getGeoserverUser() {
+		return geoserverUSER;
 	}
 	
-	public String getRESTPW() {
-		return RESTPW;
+	public String getGeoserverPassword() {
+		return geoserverPassword;
 	}
 
 }

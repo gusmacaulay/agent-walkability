@@ -33,11 +33,11 @@ public class HttpProxy_JRoller extends HttpServlet {
 	 * reference in your web.xml, setting the parameter name limitReferer to the
 	 * url prefix being allowed for referals using this Servlet.
 	 */
-	String limitReferer = null;
-	String proxyTo = null;
-	String prefix = null;
-	String proxyUserName = null;
-	String proxyPassword = null;
+	private String limitReferer = null;
+	private String proxyTo = null;
+	private String prefix = null;
+	private String proxyUserName = null;
+	private String proxyPassword = null;
 
 	public void init(ServletConfig servletConfig) throws ServletException {
 		super.init(servletConfig);
@@ -60,9 +60,6 @@ public class HttpProxy_JRoller extends HttpServlet {
 						.append(", localName->").append(localName)
 						.append(". The referer acceptance is limited to ")
 						.append(limitReferer).toString();
-				// if (LOG.isEnabledFor(Level.ERROR)) {
-				// LOG.error("[doPost]: " + msg);
-				// }
 				PrintWriter out = res.getWriter();
 				out.println(msg);
 				out.close();
@@ -84,7 +81,7 @@ public class HttpProxy_JRoller extends HttpServlet {
 			e.printStackTrace();
 		}
 
-		URL url =  dstUri.toURL();
+		URL url = dstUri.toURL();
 		String user = null, password = null, method = "POST", post = null;
 		int timeout = 0;
 
@@ -94,28 +91,19 @@ public class HttpProxy_JRoller extends HttpServlet {
 			Map.Entry header = (Map.Entry) anEntrySet;
 			String key = (String) header.getKey();
 			String value = ((String[]) header.getValue())[0];
-			// if ("user".equals(key)) {
-			// user = value;
-			// } else if ("password".equals(key)) {
-			// password = value;
-			// } else
 			if ("timeout".equals(key)) {
 				timeout = Integer.parseInt(value);
 			} else if ("method".equals(key)) {
 				method = value;
 			} else if ("post".equals(key)) {
 				post = value;
-			}
-			// else if ("url".equals(key)) {
-			// url = new URL(value);
-			// }
-			else {
+			} else {
 				headers.put(key, value);
 			}
 		}
-		user =proxyUserName;
+		user = proxyUserName;
 		password = proxyPassword;
-		
+
 		if (url != null) {
 			String digest = null;
 			if (user != null && password != null) {
@@ -193,11 +181,6 @@ public class HttpProxy_JRoller extends HttpServlet {
 					out.flush();
 				}
 			} while (foundRedirect);
-
-		} else {
-			// if (LOG.isEnabledFor(Level.ERROR)) {
-			// LOG.error("[doPost]: Given url was null.");
-			// }
 		}
 	}
 }

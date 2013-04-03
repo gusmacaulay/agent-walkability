@@ -30,6 +30,8 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.mccaughey.pathGenerator.config.LayerMapping;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,28 +54,21 @@ import com.vividsolutions.jts.linearref.LocationIndexedLine;
 public class PathGenerator {
 
 	private static final double GEOMETRY_PRECISION = 100;
-	private static final int INTERSECTION_THRESHOLD = 3;
 	static final Logger LOGGER = LoggerFactory.getLogger(PathGenerator.class);
 	private static final Double MAX_SNAP_DISTANCE = 5000.0;
 	private static PrecisionModel precision = new PrecisionModel(
 			GEOMETRY_PRECISION);
 
-	public static List<Path> shortestPaths(
-			SimpleFeatureSource networkSource, Point start,
-			List<Point> destinations) throws Exception {
-		//
-		// CoordinateReferenceSystem sourceCRS1 = CRS.decode("EPSG:4283");
-		// CoordinateReferenceSystem targetCRS1 = CRS.decode("EPSG:28355");
-		// Query query = new DefaultQuery(LayerMapping.ROAD_SAMPLE_LAYER);
-		// query.setCoordinateSystem(sourceCRS1);
-		// query.setCoordinateSystemReproject(targetCRS1);
+	private PathGenerator() {
+	}
+
+	public static List<Path> shortestPaths(SimpleFeatureSource networkSource,
+			Point start, List<Point> destinations) throws IOException,
+			NoSuchAuthorityCodeException, FactoryException {
 
 		Query query = new Query(LayerMapping.ROAD_SAMPLE_LAYER);
 		query.setCoordinateSystem(CRS.decode("EPSG:28355")); // FROM
-		//query.setCoordinateSystem( CRS.decode("EPSG:4283") ); // FROM
-		// query.setCoordinateSystemReproject( CRS.decode("EPSG:28355") ); // TO
 
-		//
 		SimpleFeatureCollection networkSimpleFeatureCollection = networkSource
 				.getFeatures(query);
 		List<LineString> lines = nodeIntersections(networkSimpleFeatureCollection);
@@ -84,16 +79,14 @@ public class PathGenerator {
 				lines, start, destinations);
 		Graph graph = lineStringGen.getGraph();
 		LOGGER.info("GRAPH: " + graph);
-		//writeNetworkFromEdges(graph.getEdges(), networkSource.getSchema());
 
 		Node startNode = lineStringGen.getNode(start.getCoordinate());
 
-		List<Path> paths = new ArrayList();
+		List<Path> paths = new ArrayList<Path>();
 		for (Point end : destinations) {
 
 			try {
 				Node endNode = lineStringGen.getNode(end.getCoordinate());
-				//LOGGER.info("Attempting path calculation");
 				if (endNode != null) {
 					LOGGER.info("Start Node: " + startNode.toString());
 					LOGGER.info("End Node: " + endNode.toString());
@@ -109,9 +102,6 @@ public class PathGenerator {
 			}
 		}
 		return paths;
-		
-
-		//return outputSimpleFeatureCollection;
 	}
 
 	private static LineStringGraphGenerator createGraphWithAdditionalNodes(
@@ -162,7 +152,6 @@ public class PathGenerator {
 		LineString newConnectingLine = geometryFactory
 				.createLineString(new Coordinate[] { pt, minDistPoint });
 
-		// lineStringGen.add(newConnectingLine);
 		lines.add(newConnectingLine);
 		if (!((lineB.getLength() == 0.0) || (lineA.getLength() == 0.0))) {
 			removeLine(lines, originalLine);
@@ -171,10 +160,7 @@ public class PathGenerator {
 			lineB = geometryFactory.createLineString(lineB.getCoordinates());
 			lines.add(lineA);
 			lines.add(lineB);
-			// lineStringGen.add(lineA);
-			// lineStringGen.add(lineB);
 		}
-		// return lineStringGen;
 		return lines;
 	}
 
@@ -198,7 +184,7 @@ public class PathGenerator {
 
 		// Initialize the minimum distance found to our maximum acceptable
 		// distance plus a little bit
-		double minDist = maxDistance;// + 1.0e-6;
+		double minDist = maxDistance;
 		Coordinate minDistPoint = null;
 		LocationIndexedLine connectedLine = null;
 
@@ -231,131 +217,28 @@ public class PathGenerator {
 		}
 	}
 
-//	private static void writePathFromEdges(List<Edge> edges,
-//			SimpleFeatureType featureType) {
-//		List<SimpleFeature> featuresList = new ArrayList();s
-//		for (Edge edge : edges) {
-//			SimpleFeature feature = buildFeatureFromGeometry(featureType,
-//					(Geometry) edge.getObject());
-//			featuresList.add(feature);
-//		}
-//		File file = new File("path.json");
-//		writeFeatures(DataUtilities.collection(featuresList), file);
-//	}
-
-	public static SimpleFeatureCollection writePathNodes(List<Path> paths,CoordinateReferenceSystem crs, File file)
+	public static SimpleFeatureCollection writePathNodes(List<Path> paths,
+			CoordinateReferenceSystem crs, File file)
 			throws GeneratedOutputEmptyException {
 		SimpleFeatureType featureType = createPathFeatureType(crs);
-		// LOGGER.info("Using Feature Type with CRS: {}",
-		// featureType.getCoordinateReferenceSystem());
 		GeometryFactory geometryFactory = new GeometryFactory(precision);
-		List<SimpleFeature> featuresList = new ArrayList();
-		// long unix_time = (long)(System.currentTimeMillis());
-		//Point startPoint = (Point) (start.getObject());
-		int path_id = 0;
+		List<SimpleFeature> featuresList = new ArrayList<SimpleFeature>();
+		int pathID = 0;
 		for (Path path : paths) {
-			path_id++;
-			// List<Edge> edges = path.getEdges();
+			pathID++;
 			Node currentNode = path.getFirst();
-			// if (pathStart.getID() == start.getID())
-			// LOGGER.info("****Start Node Correct!");
-			// else
-			// LOGGER.info("****Start Node NOT Correct");
-			// if (start.getObject()path.getFirst();
-			// List<Edge> edge = pathStart.getEdges();
 
-			long unix_time = 0; // The epoch
+			long unixTime = 0; // The epoch
 
-			// List<LineString> lines = new ArrayList();
-			LineString line;
-
-			// List<Integer> visited = new ArrayList();
-			List<String> unvisited = new ArrayList();
+			List<String> unvisited = new ArrayList<String>();
 			for (Edge edge : (List<Edge>) path.getEdges()) {
 				unvisited.add(String.valueOf(edge.getID()));
 			}
-			// LOGGER.info("PATH Vertices {}", path);
-			// LOGGER.info("PATH Edges {}", path.getEdges());
-			// LOGGER.info("Unvisited Edges {}", unvisited);
-			List<Edge> relevantEdges = path.getEdges();
-			int loopcount = 20;
 			while (unvisited.size() > 0) {
-				// LOGGER.info("Unvisited Edges {}", unvisited);
-				// loopcount--;
 				if (currentNode.getEdges().size() > 0) {
-					// LOGGER.info("Current Edges {}", currentNode.getEdges());
-
-					// LOGGER.info("Current Node {}", currentNode.getID() );
-					// LOGGER.info("Visited {} Total {}",
-					// visited.size(),path.getEdges().size());
-					for (Edge edge : (List<Edge>) currentNode.getEdges()) {
-						// if
-						// ((!(visited.contains(edge.getID())))&&(relevantEdges.contains(edge)))
-						// {
-						// LOGGER.info("Inspecting Edge {}", edge.getID());
-						if (unvisited.contains(String.valueOf(edge.getID()))) {
-							// LOGGER.info("Processing Edge {}", edge.getID());
-							line = (LineString) edge.getObject();
-							// edge.getOtherNode(currentNode);
-							// Geometry grandMls =
-							// geometryFactory.buildGeometry(lines);
-							// Point mlsPt =
-							// geometryFactory.createPoint(grandMls.getCoordinate());
-							// MultiLineString nodedLines = (MultiLineString)
-							// grandMls.union(mlsPt);
-
-							Coordinate pt = ((Point) currentNode.getObject())
-									.getCoordinate();
-
-							LengthIndexedLine lil = new LengthIndexedLine(line);
-
-							if (lil.project(pt) == lil.getStartIndex()) {// start
-																			// coordinate
-																			// is
-																			// at
-																			// start
-																			// of
-																			// line
-								// for (Coordinate coordinate :
-								// line.getCoordinates()) {
-								// LOGGER
-								for (int index = 0; index < lil.getEndIndex(); index += 25) {
-									Coordinate coordinate = lil
-											.extractPoint(index);
-									Point point = geometryFactory
-											.createPoint(coordinate);
-									SimpleFeature feature = buildTimeFeatureFromGeometry(
-											featureType, point, unix_time,
-											String.valueOf(path_id));
-									unix_time += 9000;// 7 seconds
-									featuresList.add(feature);
-								}
-							} else if (lil.project(pt) == lil.getEndIndex()) { 
-								// start coordinate is at the end of the line
-								for (int index = (int) lil.getEndIndex(); index >= 0; index -= 25) {
-									Coordinate coordinate = lil
-											.extractPoint(index);
-									Point point = geometryFactory
-											.createPoint(coordinate);
-									SimpleFeature feature = buildTimeFeatureFromGeometry(
-											featureType, point, unix_time,
-											String.valueOf(path_id));
-									unix_time += 9000;// 7 seconds
-									featuresList.add(feature);
-								}
-							} else {
-								LOGGER.error("Start coordinate did not match with Index!");
-							}
-
-							unvisited.remove(String.valueOf(edge.getID()));
-							// visited.add(edge.getID());
-							Node nextNode = edge.getOtherNode(currentNode);
-							if (nextNode != null)
-								currentNode = nextNode;
-							else
-								break;
-						}
-					}
+					featuresList = processEdges(unvisited, currentNode,
+							geometryFactory, featureType, unixTime, pathID,
+							featuresList);
 				}
 			}
 		}
@@ -382,7 +265,61 @@ public class PathGenerator {
 			throw new GeneratedOutputEmptyException();
 
 		}
+	}
 
+	private static List<SimpleFeature> processEdges(List<String> unvisited,
+			Node currentNode, GeometryFactory geometryFactory,
+			SimpleFeatureType featureType, long unixTime, int pathID,
+			List<SimpleFeature> featuresList) {
+		
+		LineString line;
+		for (Edge edge : (List<Edge>) currentNode.getEdges()) {
+
+			if (unvisited.contains(String.valueOf(edge.getID()))) {
+				line = (LineString) edge.getObject();
+
+				Coordinate pt = ((Point) currentNode.getObject())
+						.getCoordinate();
+
+				LengthIndexedLine lil = new LengthIndexedLine(line);
+
+				if (lil.project(pt) == lil.getStartIndex()) {
+					// start coordinate is at start of line
+					for (int index = 0; index < lil.getEndIndex(); index += 25) {
+						Coordinate coordinate = lil.extractPoint(index);
+						Point point = geometryFactory.createPoint(coordinate);
+						SimpleFeature feature = buildTimeFeatureFromGeometry(
+								featureType, point, unixTime,
+								String.valueOf(pathID));
+						unixTime += 9000;
+						featuresList.add(feature);
+					}
+				} else if (lil.project(pt) == lil.getEndIndex()) {
+					// start coordinate is at the end of the line
+					for (int index = (int) lil.getEndIndex(); index >= 0; index -= 25) {
+						Coordinate coordinate = lil.extractPoint(index);
+						Point point = geometryFactory.createPoint(coordinate);
+						SimpleFeature feature = buildTimeFeatureFromGeometry(
+								featureType, point, unixTime,
+								String.valueOf(pathID));
+						unixTime += 9000;
+						featuresList.add(feature);
+					}
+				} else {
+					LOGGER.error("Start coordinate did not match with Index!");
+				}
+				unvisited.remove(String.valueOf(edge.getID()));
+
+				Node nextNode = edge.getOtherNode(currentNode);
+				if (nextNode != null)
+					currentNode = nextNode;
+				else {
+					break;
+				}
+
+			}
+		}
+		return featuresList;
 	}
 
 	private static SimpleFeature buildTimeFeatureFromGeometry(
@@ -417,28 +354,6 @@ public class PathGenerator {
 		return pathType;
 	}
 
-//	private static void writeNetworkFromEdges(Collection<Edge> collection,
-//			SimpleFeatureType featureType) {
-//		List<SimpleFeature> featuresList = new ArrayList();
-//
-//		for (Edge edge : collection) {
-//			SimpleFeature feature = buildFeatureFromGeometry(featureType,
-//					(Geometry) edge.getObject());
-//			featuresList.add(feature);
-//		}
-//		File file = new File("graph.json");
-//		writeFeatures(DataUtilities.collection(featuresList), file);
-//	}
-
-	private static SimpleFeature buildFeatureFromGeometry(
-			SimpleFeatureType featureType, Geometry geom) {
-		SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
-		stb.init(featureType);
-		SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(featureType);
-		sfb.add(geom);
-		return sfb.buildFeature(null);
-	}
-
 	private static void writeFeatures(SimpleFeatureCollection features,
 			File file) {
 		FeatureJSON fjson = new FeatureJSON();
@@ -450,8 +365,6 @@ public class PathGenerator {
 					LOGGER.info("Encoding CRS?");
 					fjson.setEncodeFeatureCollectionBounds(true);
 					fjson.setEncodeFeatureCollectionCRS(true);
-					// fjson.writeCRS(features.getSchema().getCoordinateReferenceSystem(),
-					// os);
 				} else {
 					LOGGER.info("CRS is null");
 				}
@@ -523,10 +436,6 @@ public class PathGenerator {
 			for (int i = 0, n = nodedLines.getNumGeometries(); i < n; i++) {
 				Geometry g = nodedLines.getGeometryN(i);
 				if (g instanceof LineString) {
-					// DouglasPeuckerSimplifier dpls = new
-					// DouglasPeuckerSimplifier(g);
-					// g = (LineString) DouglasPeuckerSimplifier.simplify(g,
-					// 40);
 					g = (LineString) Densifier.densify(g, 5.0);
 					lines.add((LineString) g);
 				}
@@ -535,17 +444,6 @@ public class PathGenerator {
 			LOGGER.info("Failed to node non-noded intersection, ugh");
 		}
 		return lines;
-	}
-
-	private Graph buildGraph(List<LineString> lines) throws IOException {
-		// create a linear graph generate
-		LineStringGraphGenerator lineStringGen = new LineStringGraphGenerator();
-
-		for (LineString line : lines) {
-			lineStringGen.add(line);
-		}
-
-		return lineStringGen.getGraph();
 	}
 
 	private static Path findAStarShortestPath(Graph graph, Node start,

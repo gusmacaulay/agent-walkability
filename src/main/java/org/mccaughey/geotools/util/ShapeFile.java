@@ -114,8 +114,6 @@ public class ShapeFile {
 
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory
 				.createNewDataStore(params);
-		System.out
-				.println(type.getAttributeCount() + type.getName().toString());
 		if (createSchema) {
 			newDataStore.createSchema(type);
 		}
@@ -131,19 +129,17 @@ public class ShapeFile {
 			try {
 				featureStore.addFeatures(simpleFeatureCollection);
 				transaction.commit();
-				System.out.println(" commit");
+				LOGGER.info("commited to feature store");
 
 			} catch (Exception problem) {
 				problem.printStackTrace();
-				System.out.println(" rollback");
+				LOGGER.error("exception, rolling back transaction in feature store");
 				transaction.rollback();
 			} finally {
-				System.out.println(" close");
 				transaction.close();
 			}
 		} else {
-			System.out
-					.println(typeName + " does not support read/write access");
+			LOGGER.info(typeName + " does not support read/write access");
 		}
 
 	}
