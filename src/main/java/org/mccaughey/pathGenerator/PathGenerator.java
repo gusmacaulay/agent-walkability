@@ -66,11 +66,11 @@ public class PathGenerator {
 			Point start, List<Point> destinations) throws IOException,
 			NoSuchAuthorityCodeException, FactoryException {
 
-		Query query = new Query(LayerMapping.ROAD_SAMPLE_LAYER);
-		query.setCoordinateSystem(CRS.decode("EPSG:28355")); // FROM
+//		Query query = new Query(LayerMapping.ROAD_SAMPLE_LAYER);
+//		query.setCoordinateSystem(CRS.decode("EPSG:28355")); // FROM
 
 		SimpleFeatureCollection networkSimpleFeatureCollection = networkSource
-				.getFeatures(query);
+				.getFeatures();
 		List<LineString> lines = nodeIntersections(networkSimpleFeatureCollection);
 
 		LOGGER.info("FEATURES: {}", networkSimpleFeatureCollection.size());
@@ -84,7 +84,7 @@ public class PathGenerator {
 
 		List<Path> paths = new ArrayList<Path>();
 		for (Point end : destinations) {
-
+			//LOGGER.info("calculating path for this point ...");	
 			try {
 				Node endNode = lineStringGen.getNode(end.getCoordinate());
 				if (endNode != null) {
