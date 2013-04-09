@@ -95,7 +95,7 @@ public class PathGeneratorSteps extends Embedder {
 
   @When("the path generator is asked for the shortest path/s")
   public void requestShortestPath() throws Exception {
-	  List<Path> paths = PathGenerator.shortestPaths(networkSource, start, destinations);//, new File("all_path_nodes_test.json"));
+	  paths = PathGenerator.shortestPaths(networkSource, start, destinations);//, new File("all_path_nodes_test.json"));
       //paths =p.getOne();
     
 	  Assert.assertTrue(paths.size() > 0);
@@ -117,7 +117,7 @@ public class PathGeneratorSteps extends Embedder {
        // System.out.println(line.toText());
       }
     }
-    // Assert.assertTrue(path != null);
+    // Assert.assertTrue(path != null);n isntall
   }
 
   private static SimpleFeatureCollection readFeatures(URL url)
