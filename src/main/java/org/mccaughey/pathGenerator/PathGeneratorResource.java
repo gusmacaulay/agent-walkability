@@ -61,6 +61,10 @@ public class PathGeneratorResource {
 			@PathVariable String northing) throws IOException,
 			NoSuchAuthorityCodeException, FactoryException,
 			MismatchedDimensionException, TransformException {
+		
+		///
+		int stepTime = 9000;
+		///
 		ApplicationContext ctx = WebApplicationContextUtils
 				.getWebApplicationContext(request.getSession()
 						.getServletContext());
@@ -110,7 +114,7 @@ public class PathGeneratorResource {
 				CoordinateReferenceSystem crs = CRS.decode("EPSG:28355");
 				SimpleFeatureCollection paths = PathWriter.writePathNodes(
 						PathGenerator.shortestPaths(networkSource,
-								targetGeometry, destinations), crs, file);
+								targetGeometry, destinations),stepTime, crs, file);
 				//
 				request.getSession().setAttribute("Generated_File_Location",
 						file.getAbsolutePath());

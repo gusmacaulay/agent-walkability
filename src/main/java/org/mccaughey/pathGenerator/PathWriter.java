@@ -33,14 +33,14 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 public class PathWriter {
-	
+
 	static final Logger LOGGER = LoggerFactory.getLogger(PathWriter.class);
 	private static final double GEOMETRY_PRECISION = 100;
 	private static PrecisionModel precision = new PrecisionModel(
 			GEOMETRY_PRECISION);
-	
+
 	public static SimpleFeatureCollection writePathNodes(List<Path> paths,
-			CoordinateReferenceSystem crs, File file)
+			int stepTime, CoordinateReferenceSystem crs, File file)
 			throws GeneratedOutputEmptyException {
 		SimpleFeatureType featureType = createPathFeatureType(crs);
 		GeometryFactory geometryFactory = new GeometryFactory(precision);
@@ -56,13 +56,11 @@ public class PathWriter {
 			for (Edge edge : (List<Edge>) path.getEdges()) {
 				unvisited.add(String.valueOf(edge.getID()));
 			}
-			while (unvisited.size() > 0) {
-				if (currentNode.getEdges().size() > 0) {
-					featuresList = processEdges(unvisited, currentNode,
-							geometryFactory, featureType, unixTime, pathID,
-							featuresList);
-				}
-			}
+
+			featuresList = processEdges(unvisited, currentNode,
+					geometryFactory, featureType, unixTime, pathID,
+					featuresList, stepTime);
+
 		}
 		SimpleFeatureCollection pathFeatures = DataUtilities
 				.collection(featuresList);
@@ -83,62 +81,73 @@ public class PathWriter {
 
 		}
 	}
-	
+
 	private static List<SimpleFeature> processEdges(List<String> unvisited,
 			Node currentNode, GeometryFactory geometryFactory,
 			SimpleFeatureType featureType, long unixTime, int pathID,
-			List<SimpleFeature> featuresList) {
-		
+			List<SimpleFeature> featuresList, int stepTime) {
+
 		LineString line;
-		for (Edge edge : (List<Edge>) currentNode.getEdges()) {
+		// if (currentNode.getEdges().size() > 2) {
+		// //This is an intersection - therefore delay for road crossing
+		//
+		//
+		// }
+		while (unvisited.size() > 0) {
+			if (currentNode.getEdges().size() > 0) {
+				for (Edge edge : (List<Edge>) currentNode.getEdges()) {
+					LOGGER.info("processing edges ..");
+					if (unvisited.contains(String.valueOf(edge.getID()))) {
+						line = (LineString) edge.getObject();
 
-			if (unvisited.contains(String.valueOf(edge.getID()))) {
-				line = (LineString) edge.getObject();
+						Coordinate pt = ((Point) currentNode.getObject())
+								.getCoordinate();
 
-				Coordinate pt = ((Point) currentNode.getObject())
-						.getCoordinate();
+						LengthIndexedLine lil = new LengthIndexedLine(line);
 
-				LengthIndexedLine lil = new LengthIndexedLine(line);
+						if (lil.project(pt) == lil.getStartIndex()) {
+							// start coordinate is at start of line
+							for (int index = 0; index < lil.getEndIndex(); index += 25) {
+								Coordinate coordinate = lil.extractPoint(index);
+								Point point = geometryFactory
+										.createPoint(coordinate);
+								SimpleFeature feature = buildTimeFeatureFromGeometry(
+										featureType, point, unixTime,
+										String.valueOf(pathID));
+								unixTime += stepTime;
+								featuresList.add(feature);
+							}
+						} else if (lil.project(pt) == lil.getEndIndex()) {
+							// start coordinate is at the end of the line
+							for (int index = (int) lil.getEndIndex(); index >= 0; index -= 25) {
+								Coordinate coordinate = lil.extractPoint(index);
+								Point point = geometryFactory
+										.createPoint(coordinate);
+								SimpleFeature feature = buildTimeFeatureFromGeometry(
+										featureType, point, unixTime,
+										String.valueOf(pathID));
+								unixTime += stepTime;
+								featuresList.add(feature);
+							}
+						} else {
+							LOGGER.error("Start coordinate did not match with Index!");
+						}
+						unvisited.remove(String.valueOf(edge.getID()));
 
-				if (lil.project(pt) == lil.getStartIndex()) {
-					// start coordinate is at start of line
-					for (int index = 0; index < lil.getEndIndex(); index += 25) {
-						Coordinate coordinate = lil.extractPoint(index);
-						Point point = geometryFactory.createPoint(coordinate);
-						SimpleFeature feature = buildTimeFeatureFromGeometry(
-								featureType, point, unixTime,
-								String.valueOf(pathID));
-						unixTime += 9000;
-						featuresList.add(feature);
+						Node nextNode = edge.getOtherNode(currentNode);
+						if (nextNode != null)
+							currentNode = nextNode;
+						else {
+							break;
+						}
+
 					}
-				} else if (lil.project(pt) == lil.getEndIndex()) {
-					// start coordinate is at the end of the line
-					for (int index = (int) lil.getEndIndex(); index >= 0; index -= 25) {
-						Coordinate coordinate = lil.extractPoint(index);
-						Point point = geometryFactory.createPoint(coordinate);
-						SimpleFeature feature = buildTimeFeatureFromGeometry(
-								featureType, point, unixTime,
-								String.valueOf(pathID));
-						unixTime += 9000;
-						featuresList.add(feature);
-					}
-				} else {
-					LOGGER.error("Start coordinate did not match with Index!");
 				}
-				unvisited.remove(String.valueOf(edge.getID()));
-
-				Node nextNode = edge.getOtherNode(currentNode);
-				if (nextNode != null)
-					currentNode = nextNode;
-				else {
-					break;
-				}
-
 			}
 		}
 		return featuresList;
 	}
-	
+
 	private static SimpleFeature buildTimeFeatureFromGeometry(
 			SimpleFeatureType featureType, Geometry geom, long unix_time,
 			String path_id) {
