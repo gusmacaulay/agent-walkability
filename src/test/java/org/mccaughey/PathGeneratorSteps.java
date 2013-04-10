@@ -17,7 +17,6 @@ import org.geotools.feature.FeatureCollections;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.graph.path.Path;
-import org.geotools.graph.structure.Edge;
 import org.geotools.referencing.CRS;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
@@ -25,6 +24,7 @@ import org.jbehave.core.annotations.When;
 import org.jbehave.core.embedder.Embedder;
 import org.mccaughey.pathGenerator.GeneratedOutputEmptyException;
 import org.mccaughey.pathGenerator.PathGenerator;
+import org.mccaughey.pathGenerator.PathProcessor;
 import org.mccaughey.pathGenerator.PathWriter;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.FactoryException;
@@ -33,7 +33,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
@@ -128,8 +127,9 @@ public class PathGeneratorSteps extends Embedder {
 		// // Assert.assertTrue(path != null);n isntall
 		CoordinateReferenceSystem crs = CRS.decode("EPSG:28355");
 		int stepTime = 9000;
-		SimpleFeatureCollection pathFeatures = PathWriter.writePathNodes(paths,
-				stepTime, crs, new File("output.geojson"));
+		SimpleFeatureCollection pathFeatures = PathProcessor.processPathNodes(paths,
+				stepTime, crs);
+		PathWriter.writePathNodes(pathFeatures, crs,  new File("output.geojson"));
 	}
 
 	private static SimpleFeatureCollection readFeatures(URL url)

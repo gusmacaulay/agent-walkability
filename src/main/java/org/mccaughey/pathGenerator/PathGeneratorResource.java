@@ -111,10 +111,10 @@ public class PathGeneratorResource {
 					"all_path_nodes_", ".json");
 			try {
 				CoordinateReferenceSystem crs = CRS.decode("EPSG:28355");
-				SimpleFeatureCollection paths = PathWriter.writePathNodes(
+				SimpleFeatureCollection paths = PathProcessor.processPathNodes(
 						PathGenerator.shortestPaths(networkSource,
-								targetGeometry, destinations), stepTime, crs,
-						file);
+								targetGeometry, destinations), stepTime, crs);
+				PathWriter.writePathNodes(paths, crs, file);
 				//
 				request.getSession().setAttribute(SHAPEFILE_LOCATION_ATTRIBUTE,
 						file.getAbsolutePath());
