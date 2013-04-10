@@ -36,28 +36,34 @@ import org.slf4j.LoggerFactory;
 import com.vividsolutions.jts.geom.Point;
 
 public class ShapeFile {
+
+	private ShapeFile() {
+	}
+
 	static final Logger LOGGER = LoggerFactory.getLogger(ShapeFile.class);
 
 	public static File createShapeFileAndReturnAsZipFile(File geoJsonFile,
-			HttpSession session) throws IOException {
+			HttpSession session) throws IOException,
+			NoSuchAuthorityCodeException, FactoryException {
 
 		SimpleFeatureCollection featureCollection = (SimpleFeatureCollection) readFeatures(geoJsonFile);
 		return createShapeFileAndReturnAsZipFile(geoJsonFile.getName(),
 				featureCollection, session);
 	}
 
-	public static File createShapeFileAndReturnAsZipFile(String shapefileName,
+	public static File createShapeFileAndReturnAsZipFile(String fileName,
 			SimpleFeatureCollection featureCollection, HttpSession session)
-			throws IOException {
+			throws IOException, NoSuchAuthorityCodeException, FactoryException {
 
 		//
 		File tempDir = new File(System.getProperty("java.io.tmpdir"));
 		File zipfolder = Files.createTempDirectory(tempDir.toPath(),
 				"walkability_zipfolder_").toFile();
 		//
-		if (shapefileName.indexOf(".") != -1)
-			shapefileName = shapefileName.substring(0,
-					shapefileName.lastIndexOf("."));
+		String shapefileName = "";
+		if (fileName.indexOf('.') != -1) {
+			shapefileName = fileName.substring(0, fileName.lastIndexOf('.'));
+		}
 		File newFile = File.createTempFile(shapefileName, ".shp", zipfolder);
 		//
 		SimpleFeatureType sft = featureCollection.getSchema();
@@ -74,26 +80,18 @@ public class ShapeFile {
 			}
 		}
 		SimpleFeatureType newFeatureType = stb.buildFeatureType();
-		//
-		try {
-			featuresExportToShapeFile(newFeatureType, featureCollection,
-					newFile, true);
-		} catch (NoSuchAuthorityCodeException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FactoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		featuresExportToShapeFile(newFeatureType, featureCollection, newFile,
+				true);
 
 		File zipfile = TemporaryFileManager.getNew(session, shapefileName,
 				".zip", true);
 
 		Zip zip = new Zip(zipfile, newFile.getParentFile().getAbsolutePath());
 		zip.createZip();
-		//
+
 		FileUtils.deleteDirectory(zipfolder);
-		//
+
 		return zipfile;
 
 	}
@@ -132,7 +130,6 @@ public class ShapeFile {
 				LOGGER.info("commited to feature store");
 
 			} catch (Exception problem) {
-				problem.printStackTrace();
 				LOGGER.error("exception, rolling back transaction in feature store");
 				transaction.rollback();
 			} finally {
@@ -156,8 +153,6 @@ public class ShapeFile {
 					LOGGER.info("Encoding CRS?");
 					fjson.setEncodeFeatureCollectionBounds(true);
 					fjson.setEncodeFeatureCollectionCRS(true);
-					// fjson.writeCRS(features.getSchema().getCoordinateReferenceSystem(),
-					// os);
 				} else {
 					LOGGER.info("CRS is null");
 				}

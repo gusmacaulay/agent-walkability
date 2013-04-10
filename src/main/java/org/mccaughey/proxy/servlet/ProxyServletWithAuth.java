@@ -14,7 +14,10 @@ import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.servlets.ProxyServlet;
+import org.mccaughey.geotools.util.Zip;
 import org.mccaughey.pathGenerator.config.ConnectionsInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -36,6 +39,9 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * 
  */
 public class ProxyServletWithAuth extends ProxyServlet {
+	
+	static final Logger LOGGER = LoggerFactory.getLogger(ProxyServletWithAuth.class);
+	
 	private ConnectionsInfo connectionsInfo = null;
 
 	private String _prefix;
@@ -102,6 +108,7 @@ public class ProxyServletWithAuth extends ProxyServlet {
 			}
 			return new HttpURI(dstUri.toString());
 		} catch (URISyntaxException ex) {
+			LOGGER.error(ex.getMessage());
 			throw new MalformedURLException(ex.getMessage());
 		}
 	}
@@ -120,8 +127,7 @@ public class ProxyServletWithAuth extends ProxyServlet {
 				.getSession());
 		String user = connectionInfo.getGeoserverUser();
 		String password = connectionInfo.getGeoserverPassword();
-		// String user="aurin";
-		// String password="aurinaccess";
+
 		if (user != null && password != null) {
 			digest = "Basic "
 					+ new String(Base64.encodeBase64((user + ":" + password)

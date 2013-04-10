@@ -49,8 +49,12 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 @RequestMapping("/agent-paths")
 public class PathGeneratorResource {
 
+	private static final String ZIP_FILE_LOCATION_ATTRIBUTE = "Generated_ZipFile_Location";
+	
+	private static final String SHAPEFILE_LOCATION_ATTRIBUTE = "Generated_File_Location";
+
 	@Autowired
-	public WFSDataStoreFactoryImpl wfsDataStoreFactoryImpl;
+	private WFSDataStoreFactoryImpl wfsDataStoreFactoryImpl;
 
 	static final Logger LOGGER = LoggerFactory
 			.getLogger(PathGeneratorResource.class);
@@ -61,25 +65,22 @@ public class PathGeneratorResource {
 			@PathVariable String northing) throws IOException,
 			NoSuchAuthorityCodeException, FactoryException,
 			MismatchedDimensionException, TransformException {
+
 		
-		///
 		int stepTime = 9000;
-		///
+		
 		ApplicationContext ctx = WebApplicationContextUtils
 				.getWebApplicationContext(request.getSession()
 						.getServletContext());
-		ConnectionsInfo connectionsInfo = (ConnectionsInfo) ctx
-				.getBean(ConnectionsInfo.class);
 
-		;
 		DataStore dataStore = wfsDataStoreFactoryImpl
-				.getDataStore(LayerMapping.RANDOM_DESTINATION_LAYER);
+				.getDataStore(LayerMapping.randomDestinationLayer);
 		SimpleFeatureSource networkSource = dataStore
-				.getFeatureSource(LayerMapping.ROAD_SAMPLE_LAYER);
-		Query query = new DefaultQuery(LayerMapping.RANDOM_DESTINATION_LAYER);
+				.getFeatureSource(LayerMapping.roadSampleLayer);
+		Query query = new DefaultQuery(LayerMapping.randomDestinationLayer);
 		query.setCoordinateSystem(CRS.decode("EPSG:28355"));
 		SimpleFeatureIterator features = dataStore
-				.getFeatureSource(LayerMapping.RANDOM_DESTINATION_LAYER)
+				.getFeatureSource(LayerMapping.randomDestinationLayer)
 				.getFeatures(query).features();
 		//
 		List<Point> destinations = new ArrayList<Point>();
@@ -88,8 +89,6 @@ public class PathGeneratorResource {
 			destinations.add((Point) feature.getDefaultGeometry());
 		}
 
-		GeometryFactory geometryFactory2 = new GeometryFactory(
-				new PrecisionModel(0));
 		GeometryFactory geometryFactory = new GeometryFactory(
 				new PrecisionModel(0));
 		Point start = geometryFactory.createPoint(new Coordinate(Double
@@ -114,14 +113,15 @@ public class PathGeneratorResource {
 				CoordinateReferenceSystem crs = CRS.decode("EPSG:28355");
 				SimpleFeatureCollection paths = PathWriter.writePathNodes(
 						PathGenerator.shortestPaths(networkSource,
-								targetGeometry, destinations),stepTime, crs, file);
+								targetGeometry, destinations), stepTime, crs,
+						file);
 				//
-				request.getSession().setAttribute("Generated_File_Location",
+				request.getSession().setAttribute(SHAPEFILE_LOCATION_ATTRIBUTE,
 						file.getAbsolutePath());
 				//
 				File zipfile = ShapeFile.createShapeFileAndReturnAsZipFile(
 						file.getName(), paths, request.getSession());
-				request.getSession().setAttribute("Generated_ZipFile_Location",
+				request.getSession().setAttribute(ZIP_FILE_LOCATION_ATTRIBUTE,
 						zipfile.getAbsolutePath());
 				//
 				LOGGER.info("Paths Generated");
@@ -138,10 +138,11 @@ public class PathGeneratorResource {
 	public void downloadGeneratedOutput(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		synchronized (request.getSession()) {
-			if (request.getSession().getAttribute("Generated_File_Location") == null)
+			if (request.getSession().getAttribute(SHAPEFILE_LOCATION_ATTRIBUTE) == null) {
 				throw new IOException("No output is generated");
+			}
 			File file = new File((String) request.getSession().getAttribute(
-					"Generated_File_Location"));
+					SHAPEFILE_LOCATION_ATTRIBUTE));
 			response.setContentType("application/x-download");
 			response.setHeader("Content-disposition", "attachment; filename="
 					+ "agent_walkability_output.geojson");
@@ -154,10 +155,11 @@ public class PathGeneratorResource {
 	public void downloadGeneratedOutputAzShpZip(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		synchronized (request.getSession()) {
-			if (request.getSession().getAttribute("Generated_File_Location") == null)
+			if (request.getSession().getAttribute(SHAPEFILE_LOCATION_ATTRIBUTE) == null) {
 				throw new IOException("No output is generated");
+			}
 			File file = new File((String) request.getSession().getAttribute(
-					"Generated_ZipFile_Location"));
+					ZIP_FILE_LOCATION_ATTRIBUTE));
 			response.setContentType("application/x-download");
 			response.setHeader("Content-disposition", "attachment; filename="
 					+ "agent_walkability_output.zip");

@@ -32,12 +32,15 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
-public class PathWriter {
+public final class PathWriter {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(PathWriter.class);
 	private static final double GEOMETRY_PRECISION = 100;
 	private static PrecisionModel precision = new PrecisionModel(
 			GEOMETRY_PRECISION);
+
+	private PathWriter() {
+	}
 
 	public static SimpleFeatureCollection writePathNodes(List<Path> paths,
 			int stepTime, CoordinateReferenceSystem crs, File file)
@@ -64,13 +67,13 @@ public class PathWriter {
 		}
 		SimpleFeatureCollection pathFeatures = DataUtilities
 				.collection(featuresList);
-		CoordinateReferenceSystem crs_target = DefaultGeographicCRS.WGS84;
+		CoordinateReferenceSystem targetCRS = DefaultGeographicCRS.WGS84;
 		LOGGER.info(crs.toWKT());
 
 		boolean outputisNotEmpty = pathFeatures.size() > 0;
 		if (outputisNotEmpty) {
 			ReprojectingFeatureCollection rfc = new ReprojectingFeatureCollection(
-					pathFeatures, crs_target);
+					pathFeatures, targetCRS);
 
 			writeFeatures(rfc, file);
 			LOGGER.info("GeoJSON writing complete");
@@ -83,20 +86,20 @@ public class PathWriter {
 	}
 
 	private static List<SimpleFeature> processEdges(List<String> unvisited,
-			Node currentNode, GeometryFactory geometryFactory,
-			SimpleFeatureType featureType, long unixTime, int pathID,
+			Node startNode, GeometryFactory geometryFactory,
+			SimpleFeatureType featureType, long walkTime, int pathID,
 			List<SimpleFeature> featuresList, int stepTime) {
 
 		LineString line;
-		// if (currentNode.getEdges().size() > 2) {
-		// //This is an intersection - therefore delay for road crossing
-		//
-		//
-		// }
+		Node currentNode = startNode;
 		while (unvisited.size() > 0) {
 			if (currentNode.getEdges().size() > 0) {
+				int intersectionWait = 0;
+				if (currentNode.getEdges().size() > 2) {
+					// This is an intersection - therefore delay for crossing
+					intersectionWait = 30000;
+				}
 				for (Edge edge : (List<Edge>) currentNode.getEdges()) {
-					LOGGER.info("processing edges ..");
 					if (unvisited.contains(String.valueOf(edge.getID()))) {
 						line = (LineString) edge.getObject();
 
@@ -112,9 +115,10 @@ public class PathWriter {
 								Point point = geometryFactory
 										.createPoint(coordinate);
 								SimpleFeature feature = buildTimeFeatureFromGeometry(
-										featureType, point, unixTime,
+										featureType, point, walkTime,
 										String.valueOf(pathID));
-								unixTime += stepTime;
+								walkTime += stepTime + intersectionWait;
+								intersectionWait = 0; //only perform wait once
 								featuresList.add(feature);
 							}
 						} else if (lil.project(pt) == lil.getEndIndex()) {
@@ -124,9 +128,10 @@ public class PathWriter {
 								Point point = geometryFactory
 										.createPoint(coordinate);
 								SimpleFeature feature = buildTimeFeatureFromGeometry(
-										featureType, point, unixTime,
+										featureType, point, walkTime,
 										String.valueOf(pathID));
-								unixTime += stepTime;
+								walkTime += stepTime + intersectionWait;
+								intersectionWait = 0; //only perform wait once
 								featuresList.add(feature);
 							}
 						} else {
@@ -149,14 +154,14 @@ public class PathWriter {
 	}
 
 	private static SimpleFeature buildTimeFeatureFromGeometry(
-			SimpleFeatureType featureType, Geometry geom, long unix_time,
-			String path_id) {
+			SimpleFeatureType featureType, Geometry geom, long walkTime,
+			String pathID) {
 		SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
 		stb.init(featureType);
 		SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(featureType);
 		sfb.add(geom);
-		sfb.add(unix_time);
-		sfb.add(path_id);
+		sfb.add(walkTime);
+		sfb.add(pathID);
 		return sfb.buildFeature(null);
 	}
 

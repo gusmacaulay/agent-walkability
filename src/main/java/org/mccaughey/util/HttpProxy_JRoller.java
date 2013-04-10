@@ -12,8 +12,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -22,12 +20,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpProxy_JRoller extends HttpServlet {
 
-	private static final Logger LOG = Logger.getLogger(HttpProxy_JRoller.class
-			.getName());
-
+	static final Logger LOGGER = LoggerFactory
+			.getLogger(HttpProxy_JRoller.class);
 	/**
 	 * To set a referer limitation, add an init parameter to the Servlet
 	 * reference in your web.xml, setting the parameter name limitReferer to the
@@ -48,44 +47,45 @@ public class HttpProxy_JRoller extends HttpServlet {
 		proxyPassword = servletConfig.getInitParameter("ProxyPassword");
 	}
 
-	protected void doPost(HttpServletRequest req, HttpServletResponse res)
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		if (limitReferer != null && limitReferer.trim().length() > 0) {
-			String referer = req.getHeader("Referer");
-			String localName = req.getLocalName();
+			String referer = request.getHeader("Referer");
+			String localName = request.getLocalName();
 			if (!referer.startsWith(limitReferer)) {
 				final String msg = new StringBuilder()
 						.append("Blocked request for referer ").append(referer)
 						.append(", localName->").append(localName)
 						.append(". The referer acceptance is limited to ")
 						.append(limitReferer).toString();
-				PrintWriter out = res.getWriter();
+				PrintWriter out = response.getWriter();
 				out.println(msg);
 				out.close();
 				return;
 			}
 		}
-		String uri = req.getRequestURI();
-		if (req.getQueryString() != null)
-			uri += "?" + req.getQueryString();
-		URI dstUri = null;
-		try {
-			if (!uri.startsWith(prefix)) {
-				dstUri = new URI(proxyTo + uri).normalize();
-			}
-			dstUri = new URI(proxyTo + uri.substring(prefix.length()))
-					.normalize();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		String uri = request.getRequestURI();
+		if (request.getQueryString() != null) {
+			uri += "?" + request.getQueryString();
 		}
+		URI dstUri = null;
+		
+		if (!uri.startsWith(prefix)) {
+			try {
+				dstUri = new URI(proxyTo + uri).normalize();
+				dstUri = new URI(proxyTo + uri.substring(prefix.length())).normalize();
+			} catch (URISyntaxException e) {
+				throw new ServletException(e);
+			}
+		}
+		
 
 		URL url = dstUri.toURL();
 		String user = null, password = null, method = "POST", post = null;
 		int timeout = 0;
 
-		Set entrySet = req.getParameterMap().entrySet();
+		Set entrySet = request.getParameterMap().entrySet();
 		Map headers = new HashMap();
 		for (Object anEntrySet : entrySet) {
 			Map.Entry header = (Map.Entry) anEntrySet;
@@ -149,7 +149,7 @@ public class HttpProxy_JRoller extends HttpServlet {
 				// get content type
 				String contentType = urlConnection.getContentType();
 				if (contentType != null) {
-					res.setContentType(contentType);
+					response.setContentType(contentType);
 				}
 
 				// get reponse code
@@ -161,7 +161,7 @@ public class HttpProxy_JRoller extends HttpServlet {
 					url = new URL(location);
 					foundRedirect = true;
 				} else {
-					res.setStatus(responseCode);
+					response.setStatus(responseCode);
 					BufferedInputStream in;
 					if (responseCode == 200 || responseCode == 201) {
 						in = new BufferedInputStream(
@@ -173,7 +173,7 @@ public class HttpProxy_JRoller extends HttpServlet {
 
 					// send output to client
 					BufferedOutputStream out = new BufferedOutputStream(
-							res.getOutputStream());
+							response.getOutputStream());
 					int c;
 					while ((c = in.read()) >= 0) {
 						out.write(c);
