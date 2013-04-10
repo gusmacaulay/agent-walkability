@@ -31,18 +31,20 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 public class PathProcessor {
-	
+
 	static final Logger LOGGER = LoggerFactory.getLogger(PathProcessor.class);
-	
+
 	private static final double GEOMETRY_PRECISION = 100;
 	private static PrecisionModel precision = new PrecisionModel(
 			GEOMETRY_PRECISION);
-	
-	private PathProcessor() {}
-	
+
+	private PathProcessor() {
+	}
+
 	public static SimpleFeatureCollection processPathNodes(List<Path> paths,
 			int stepTime, CoordinateReferenceSystem crs)
 			throws GeneratedOutputEmptyException {
+
 		SimpleFeatureType featureType = createPathFeatureType(crs);
 		GeometryFactory geometryFactory = new GeometryFactory(precision);
 		List<SimpleFeature> featuresList = new ArrayList<SimpleFeature>();
@@ -51,7 +53,7 @@ public class PathProcessor {
 			pathID++;
 			Node currentNode = path.getFirst();
 
-			long unixTime = 0; // The epoch
+			long walkTime = 0; // The epoch in unix time
 
 			List<String> unvisited = new ArrayList<String>();
 			for (Edge edge : (List<Edge>) path.getEdges()) {
@@ -59,7 +61,7 @@ public class PathProcessor {
 			}
 
 			featuresList = processEdges(unvisited, currentNode,
-					geometryFactory, featureType, unixTime, pathID,
+					geometryFactory, featureType, walkTime, pathID,
 					featuresList, stepTime);
 
 		}
@@ -67,20 +69,24 @@ public class PathProcessor {
 				.collection(featuresList);
 		return pathFeatures;
 	}
-	
+
 	private static List<SimpleFeature> processEdges(List<String> unvisited,
 			Node startNode, GeometryFactory geometryFactory,
 			SimpleFeatureType featureType, long walkTime, int pathID,
 			List<SimpleFeature> featuresList, int stepTime) {
 
+		int maxTime = 1200000;
+		
 		LineString line;
 		Node currentNode = startNode;
-		while (unvisited.size() > 0) {
+		int crossings = 0;
+		while ((unvisited.size() > 0)&&(walkTime <= maxTime)) {
 			if (currentNode.getEdges().size() > 0) {
 				int intersectionWait = 0;
 				if (currentNode.getEdges().size() > 2) {
 					// This is an intersection - therefore delay for crossing
 					intersectionWait = 30000;
+					crossings++;
 				}
 				for (Edge edge : (List<Edge>) currentNode.getEdges()) {
 					if (unvisited.contains(String.valueOf(edge.getID()))) {
@@ -98,7 +104,7 @@ public class PathProcessor {
 								Point point = geometryFactory
 										.createPoint(coordinate);
 								SimpleFeature feature = buildTimeFeatureFromGeometry(
-										featureType, point, walkTime,
+										featureType, point, walkTime,crossings,
 										String.valueOf(pathID));
 								walkTime += stepTime + intersectionWait;
 								intersectionWait = 0; // only perform wait once
@@ -111,7 +117,7 @@ public class PathProcessor {
 								Point point = geometryFactory
 										.createPoint(coordinate);
 								SimpleFeature feature = buildTimeFeatureFromGeometry(
-										featureType, point, walkTime,
+										featureType, point, walkTime,crossings,
 										String.valueOf(pathID));
 								walkTime += stepTime + intersectionWait;
 								intersectionWait = 0; // only perform wait once
@@ -138,12 +144,14 @@ public class PathProcessor {
 
 	private static SimpleFeature buildTimeFeatureFromGeometry(
 			SimpleFeatureType featureType, Geometry geom, long walkTime,
-			String pathID) {
+			int crossings/*, int walkDistance*/, String pathID) {
 		SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
 		stb.init(featureType);
 		SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(featureType);
 		sfb.add(geom);
 		sfb.add(walkTime);
+		sfb.add(crossings);
+		//sfb.add(walkDistance);
 		sfb.add(pathID);
 		return sfb.buildFeature(null);
 	}
@@ -160,6 +168,8 @@ public class PathProcessor {
 		// add attributes in order
 		builder.add("geometry", Point.class);
 		builder.add("when", Integer.class);
+		builder.add("crossings", Integer.class);
+		//builder.add("walk_dist", Integer.class);
 		builder.add("path_id", String.class);
 
 		// build the type
