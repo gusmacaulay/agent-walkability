@@ -128,13 +128,15 @@ public class PathGeneratorSteps extends Embedder {
 		// }
 		// // Assert.assertTrue(path != null);n isntall
 		CoordinateReferenceSystem crs = CRS.decode("EPSG:28355");
-		int stepTime = 9000;
+		int stepTime = 18000;
 		SimpleFeatureCollection pathFeatures = PathProcessor.processPathNodes(paths,
 				stepTime, crs);
 		PathWriter.writePathNodes(pathFeatures, crs,  new File("output.geojson"));
 		int maxDistance = 1600;
 		Map<String,Double> metrics = MetricAnalyser.calculateMetrics(pathFeatures,maxDistance);
 		System.out.println("AVERAGE CROSSINGS: " + metrics.get("meanCrossings"));
+		System.out.println("AVERAGE DISTANCE: " + metrics.get("meanDistanceTravelled"));
+		System.out.println("AREA RATIO: " + metrics.get("ratioOfAreas"));
 	}
 
 	private static SimpleFeatureCollection readFeatures(URL url)

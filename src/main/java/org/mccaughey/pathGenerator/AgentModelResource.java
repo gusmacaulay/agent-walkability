@@ -67,7 +67,8 @@ public class AgentModelResource {
 			MismatchedDimensionException, TransformException {
 
 		
-		int stepTime = 9000;
+		int stepTime = 18000;
+		int maxDistance = 1600;
 		
 		ApplicationContext ctx = WebApplicationContextUtils
 				.getWebApplicationContext(request.getSession()
@@ -115,7 +116,7 @@ public class AgentModelResource {
 						PathGenerator.shortestPaths(networkSource,
 								targetGeometry, destinations), stepTime, crs);
 				PathWriter.writePathNodes(paths, crs, file);
-				int maxDistance = 1600;
+				
 				Map<String,Double> metrics = MetricAnalyser.calculateMetrics(paths,maxDistance);
 				LOGGER.info("AVERAGE CROSSINGS: {}", metrics.get("meanCrossings"));
 				//

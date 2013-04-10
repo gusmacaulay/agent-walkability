@@ -28,7 +28,7 @@ public final class MetricAnalyser {
 
 		metrics.put("ratioOfAreas", ratioOfAreas(destinationFeatures,maxDistance));
 		metrics.put("meanCrossings", meanCrossings(destinationFeatures));
-		metrics.put("agentPaths", meanDistanceTravelled(destinationFeatures));
+		metrics.put("meanDistanceTravelled", meanDistanceTravelled(destinationFeatures));
 		return metrics;
 
 	}
@@ -61,8 +61,17 @@ public final class MetricAnalyser {
 
 	private static Double meanDistanceTravelled(
 			SimpleFeatureCollection agentDestinations) {
-		// TODO Auto-generated method stub
-		return null;
+		int totalDistance = 0;
+		SimpleFeatureIterator iter = agentDestinations.features();
+		try {
+			while (iter.hasNext()) {
+				SimpleFeature feature = iter.next();
+				totalDistance += (int) feature.getAttribute("walk_dist");
+			}
+		} finally {
+			iter.close();
+		}
+		return (double) (totalDistance / agentDestinations.size());
 	}
 
 	private static Double meanCrossings(

@@ -80,6 +80,7 @@ public class PathProcessor {
 		LineString line;
 		Node currentNode = startNode;
 		int crossings = 0;
+		int walkDistance = 0;
 		while ((unvisited.size() > 0)&&(walkTime <= maxTime)) {
 			if (currentNode.getEdges().size() > 0) {
 				int intersectionWait = 0;
@@ -104,8 +105,9 @@ public class PathProcessor {
 								Point point = geometryFactory
 										.createPoint(coordinate);
 								SimpleFeature feature = buildTimeFeatureFromGeometry(
-										featureType, point, walkTime,crossings,
+										featureType, point, walkTime,crossings,walkDistance,
 										String.valueOf(pathID));
+								walkDistance += 25; 
 								walkTime += stepTime + intersectionWait;
 								intersectionWait = 0; // only perform wait once
 								featuresList.add(feature);
@@ -117,8 +119,9 @@ public class PathProcessor {
 								Point point = geometryFactory
 										.createPoint(coordinate);
 								SimpleFeature feature = buildTimeFeatureFromGeometry(
-										featureType, point, walkTime,crossings,
+										featureType, point, walkTime,crossings,walkDistance,
 										String.valueOf(pathID));
+								walkDistance += 25; 
 								walkTime += stepTime + intersectionWait;
 								intersectionWait = 0; // only perform wait once
 								featuresList.add(feature);
@@ -144,14 +147,14 @@ public class PathProcessor {
 
 	private static SimpleFeature buildTimeFeatureFromGeometry(
 			SimpleFeatureType featureType, Geometry geom, long walkTime,
-			int crossings/*, int walkDistance*/, String pathID) {
+			int crossings,int walkDistance, String pathID) {
 		SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
 		stb.init(featureType);
 		SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(featureType);
 		sfb.add(geom);
 		sfb.add(walkTime);
 		sfb.add(crossings);
-		//sfb.add(walkDistance);
+		sfb.add(walkDistance);
 		sfb.add(pathID);
 		return sfb.buildFeature(null);
 	}
@@ -169,7 +172,7 @@ public class PathProcessor {
 		builder.add("geometry", Point.class);
 		builder.add("when", Integer.class);
 		builder.add("crossings", Integer.class);
-		//builder.add("walk_dist", Integer.class);
+		builder.add("walk_dist", Integer.class);
 		builder.add("path_id", String.class);
 
 		// build the type
