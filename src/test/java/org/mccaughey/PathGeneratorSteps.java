@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -23,6 +24,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.embedder.Embedder;
 import org.mccaughey.pathGenerator.GeneratedOutputEmptyException;
+import org.mccaughey.pathGenerator.MetricAnalyser;
 import org.mccaughey.pathGenerator.PathGenerator;
 import org.mccaughey.pathGenerator.PathProcessor;
 import org.mccaughey.pathGenerator.PathWriter;
@@ -130,6 +132,8 @@ public class PathGeneratorSteps extends Embedder {
 		SimpleFeatureCollection pathFeatures = PathProcessor.processPathNodes(paths,
 				stepTime, crs);
 		PathWriter.writePathNodes(pathFeatures, crs,  new File("output.geojson"));
+		Map<String,Double> metrics = MetricAnalyser.calculateMetrics(pathFeatures);
+		System.out.println("AVERAGE CROSSINGS: " + metrics.get("meanCrossings"));
 	}
 
 	private static SimpleFeatureCollection readFeatures(URL url)
