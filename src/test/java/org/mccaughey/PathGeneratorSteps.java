@@ -132,7 +132,8 @@ public class PathGeneratorSteps extends Embedder {
 		SimpleFeatureCollection pathFeatures = PathProcessor.processPathNodes(paths,
 				stepTime, crs);
 		PathWriter.writePathNodes(pathFeatures, crs,  new File("output.geojson"));
-		Map<String,Double> metrics = MetricAnalyser.calculateMetrics(pathFeatures);
+		int maxDistance = 1600;
+		Map<String,Double> metrics = MetricAnalyser.calculateMetrics(pathFeatures,maxDistance);
 		System.out.println("AVERAGE CROSSINGS: " + metrics.get("meanCrossings"));
 	}
 

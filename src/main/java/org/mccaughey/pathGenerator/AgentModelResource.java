@@ -115,7 +115,8 @@ public class AgentModelResource {
 						PathGenerator.shortestPaths(networkSource,
 								targetGeometry, destinations), stepTime, crs);
 				PathWriter.writePathNodes(paths, crs, file);
-				Map<String,Double> metrics = MetricAnalyser.calculateMetrics(paths);
+				int maxDistance = 1600;
+				Map<String,Double> metrics = MetricAnalyser.calculateMetrics(paths,maxDistance);
 				LOGGER.info("AVERAGE CROSSINGS: {}", metrics.get("meanCrossings"));
 				//
 				request.getSession().setAttribute(SHAPEFILE_LOCATION_ATTRIBUTE,
