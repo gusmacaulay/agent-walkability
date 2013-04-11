@@ -1,8 +1,6 @@
 var map, filter, filterStrategy;
 var animationTimer;
 var currentDate;
-// var startDate = new Date(1272736800000); // lower bound of when values
-// var endDate = new Date(1272737100000); // upper value of when values
 var startDate = new Date(0); // lower bound of when values
 
 var step = 9; // seccods to advance each interval
@@ -20,10 +18,7 @@ function startAnimation() {
 	if (!currentDate) {
 		currentDate = startDate;
 	}
-	// var spanEl = document.getElementById("span");
 	var next = function() {
-		// alert("working! current date " + currentDate + " end date " + endDate
-		// );
 		var span = 40
 		if (currentDate < endDate) {
 			filter.lowerBoundary = startDate;// currentDate;
@@ -147,14 +142,6 @@ function loadPaths() {
 		}),
 		styleMap : new OpenLayers.StyleMap({
 			"default" : pathStyle
-		// "default" : new OpenLayers.Style({
-		// graphicName : "circle",
-		// pointRadius : 10,
-		// fillOpacity : 0.5,
-		// fillColor : "#9e69e3",
-		// strokeColor : "#8e45ed",
-		// strokeWidth : 1
-		// })
 		}),
 		renderers : [ "Canvas", "SVG", "VML" ]
 	});
@@ -178,11 +165,6 @@ function loadPaths() {
 					});
 
 	map.addLayer(paths);
-	// alert("Loaded Paths");
-	// map.setCenter(new OpenLayers.LonLat(144.570412433435773,
-	// -37.701804450869475)
-	// .transform(geographic, mercator), 16);
-
 }
 function showValue(newValue, spanId) {
 	document.getElementById(spanId).innerHTML = newValue;
@@ -198,7 +180,6 @@ document.getElementById("download").onclick = downloadOutput;
 var mercator = new OpenLayers.Projection("EPSG:900913");
 var geographic = new OpenLayers.Projection("EPSG:4326");
 var vicgrid = new OpenLayers.Projection("EPSG:28355");
-// var victorian = new OpenLayers.Projection("EPSG:28355");
 var controls = [ new OpenLayers.Control.LayerSwitcher(),
 		new OpenLayers.Control.Zoom() ];
 map = new OpenLayers.Map("map", {
@@ -228,11 +209,9 @@ OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
 
 	trigger : function(e) {
 		map.g
-		var lonlat = (map.getLonLatFromPixel(e.xy)); // .transform(mercator,geographic);
+		var lonlat = (map.getLonLatFromPixel(e.xy));
 		easting = lonlat.lon;
 		northing = lonlat.lat;
-		// alert("You clicked near " + lonlat.lat + " N, " +
-		// + lonlat.lon + " E");
 	}
 
 });
@@ -271,24 +250,7 @@ var DeleteFeature = OpenLayers.Class(OpenLayers.Control, {
 });
 
 function initWFSTools() {
-	// OpenLayers.ProxyHost = "proxy.cgi?url=";
-	// map = new OpenLayers.Map({
-	// div: "map",
-	// // maxResolution: 156543.0339,
-	// // maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508,
-	// 20037508),
-	// // restrictedExtent: new OpenLayers.Bounds(
-	// // -11563906, 5540550, -11559015, 5542996
-	// // ),
-	// projection: new OpenLayers.Projection("EPSG:900913"),
-	// units: "m",
-	// controls: [
-	// new OpenLayers.Control.PanZoom(),
-	// new OpenLayers.Control.Navigation()
-	// ]
-	// });
 
-	// var osm = new OpenLayers.Layer.OSM();
 	var styles = new OpenLayers.StyleMap({
 		"default" : new OpenLayers.Style(null, {
 			rules : [ new OpenLayers.Rule({
@@ -347,15 +309,11 @@ function initWFSTools() {
 							version : "1.1.0",
 							srsName : "EPSG:900913",
 							url : "/agent-walkability/geoserver/wfs",
-							// featureNS : "walkability",
 							featureType : "melton_roads_sample",
 							geometryName : "geom",
 							schema : "/agent-walkability/geoserver/wfs/DescribeFeatureType?version=1.1.0&typename=CSDILA_local:melton_roads_sample"
 						})
 			});
-	//       
-	// map.addLayers([osm,wfs]);
-
 }
 
 function setControls() {
@@ -417,7 +375,6 @@ function setControls() {
 	panel.addControls([ save, del, modify, draw ]);
 
 	map.addControl(panel);
-	// map.setCenter(new OpenLayers.LonLat(-11561460.5, 5541773), 15);
 }
 
 function flashFeatures(features, index) {
@@ -457,18 +414,12 @@ function init() {
 				buffer : 0,
 				displayOutsideMaxExtent : true,
 				reproject : true
-			// yx : {
-			// 'EPSG:900913' : false
-			// }
 			});
 	destinations.setIsBaseLayer(false);
-	// estinations.isBaseLayer(false);
+	destinations.setVisibility(false)
 	map.addLayers([ wfs, destinations ])
 	setControls();
 	map.setCenter(new OpenLayers.LonLat(16093371, -4537265), 15);
-	// map.setCenter(new OpenLayers.LonLat(144.570412433435773,
-	// -37.701804450869475)
-	// .transform(geographic, mercator), 15);
 	var click = new OpenLayers.Control.Click();
 	map.addControl(click);
 	map.addControl(pointControl);
