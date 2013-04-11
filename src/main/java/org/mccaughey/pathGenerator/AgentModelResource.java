@@ -2,6 +2,7 @@ package org.mccaughey.pathGenerator;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import au.com.bytecode.opencsv.CSVWriter;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
@@ -52,6 +55,7 @@ public class AgentModelResource {
 	private static final int MILLISECONDS = 1000;
 	private static final String ZIP_FILE_LOCATION_ATTRIBUTE = "Generated_ZipFile_Location";
 	private static final String SHAPEFILE_LOCATION_ATTRIBUTE = "Generated_File_Location";
+	private static final String METRICS_LOCATION_ATTRIBUTE = "Metrics_File_Location";
 	private static final int STEP_DISTANCE = 25;
 
 	@Autowired
@@ -67,10 +71,6 @@ public class AgentModelResource {
 			@PathVariable int intersectionWait, @PathVariable double walkSpeed)
 			throws IOException, NoSuchAuthorityCodeException, FactoryException,
 			MismatchedDimensionException, TransformException {
-
-//		int maxTime = 1200000;
-//		int intersectionWait = 30000;
-//		double walkSpeed = 1.33;
 
 		double stepTime = (STEP_DISTANCE / walkSpeed) * MILLISECONDS;
 		double maxDistance = (maxTime * walkSpeed) / MILLISECONDS;
@@ -115,6 +115,8 @@ public class AgentModelResource {
 			TemporaryFileManager.deleteAll(request.getSession());
 			File file = TemporaryFileManager.getNew(request.getSession(),
 					"all_path_nodes_", ".json");
+			File metricsFile = TemporaryFileManager.getNew(
+					request.getSession(), "metrics", ".csv");
 			try {
 
 				CoordinateReferenceSystem crs = CRS.decode("EPSG:28355");
@@ -123,25 +125,41 @@ public class AgentModelResource {
 						PathGenerator.shortestPaths(networkSource,
 								targetGeometry, destinations), stepTime,
 						maxTime, intersectionWait, STEP_DISTANCE, crs);
-				PathWriter.writePathNodes(paths, crs, file);
 
-				Map<String, Double> metrics = MetricAnalyser.calculateMetrics(
+				Map<String, String> metrics = MetricAnalyser.calculateMetrics(
 						paths, maxDistance);
 				LOGGER.info("AVERAGE CROSSINGS: {}",
 						metrics.get("meanCrossings"));
+				LOGGER.info("Writing metrics to file {}",
+						metricsFile.getAbsoluteFile());
+				CSVWriter writer = new CSVWriter(new FileWriter(metricsFile.getAbsolutePath()), ',');
+				for (String key : metrics.keySet()) {
+					String[] keyValue = new String[2];
+					keyValue[0] = key;
+					keyValue[1] = metrics.get(key);
+					writer.writeNext(keyValue);
+				}
+				writer.close();
+				request.getSession().setAttribute(METRICS_LOCATION_ATTRIBUTE,
+						metricsFile.getAbsolutePath());
+				
+
 				//
+				PathWriter.writePathNodes(paths, crs, file);
 				request.getSession().setAttribute(SHAPEFILE_LOCATION_ATTRIBUTE,
 						file.getAbsolutePath());
-				//
+				LOGGER.info("Writing shp to file {}", file.getAbsoluteFile());
 				File zipfile = ShapeFile.createShapeFileAndReturnAsZipFile(
-						file.getName(), paths, request.getSession());
+						file.getName(),metricsFile, paths, request.getSession());
 				request.getSession().setAttribute(ZIP_FILE_LOCATION_ATTRIBUTE,
 						zipfile.getAbsolutePath());
 				//
+				LOGGER.info("Writing zip to file {}", zipfile.getAbsoluteFile());
 				LOGGER.info("Paths Generated");
 				FileCopyUtils.copy(new FileInputStream(file),
 						response.getOutputStream());
 			} catch (GeneratedOutputEmptyException e) {
+				LOGGER.error("Empty Output!!");
 				TemporaryFileManager.deleteAll(request.getSession());
 			}
 

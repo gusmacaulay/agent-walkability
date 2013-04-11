@@ -21,14 +21,14 @@ public final class MetricAnalyser {
 	private MetricAnalyser() {
 	}
 
-	public static Map<String, Double> calculateMetrics(
+	public static Map<String, String> calculateMetrics(
 			SimpleFeatureCollection agentPaths, double maxDistance) {
-		Map<String, Double> metrics = new HashMap<String, Double>();
+		Map<String, String> metrics = new HashMap<String, String>();
 		SimpleFeatureCollection destinationFeatures = getDestinationFeatures(agentPaths);
 
-		metrics.put("ratioOfAreas", ratioOfAreas(destinationFeatures,maxDistance));
-		metrics.put("meanCrossings", meanCrossings(destinationFeatures));
-		metrics.put("meanDistanceTravelled", meanDistanceTravelled(destinationFeatures));
+		metrics.put("ratioOfAreas", ratioOfAreas(destinationFeatures,maxDistance).toString());
+		metrics.put("meanCrossings", meanCrossings(destinationFeatures).toString());
+		metrics.put("meanDistanceTravelled", meanDistanceTravelled(destinationFeatures).toString());
 		return metrics;
 
 	}
@@ -86,7 +86,7 @@ public final class MetricAnalyser {
 		} finally {
 			iter.close();
 		}
-		return (double) (totalCrossings / agentDestinations.size());
+		return ((double) (totalCrossings / agentDestinations.size()));
 	}
 
 	private static Double ratioOfAreas(SimpleFeatureCollection agentDestinations, double maxDistance) {

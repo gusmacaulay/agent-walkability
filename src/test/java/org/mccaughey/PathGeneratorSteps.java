@@ -128,7 +128,7 @@ public class PathGeneratorSteps extends Embedder {
 				stepTime,maxTime,intersectionWait,stepDistance, crs);
 		PathWriter.writePathNodes(pathFeatures, crs,  new File("output.geojson"));
 		int maxDistance = 1600;
-		Map<String,Double> metrics = MetricAnalyser.calculateMetrics(pathFeatures,maxDistance);
+		Map<String, String> metrics = MetricAnalyser.calculateMetrics(pathFeatures,maxDistance);
 		System.out.println("AVERAGE CROSSINGS: " + metrics.get("meanCrossings"));
 		System.out.println("AVERAGE DISTANCE: " + metrics.get("meanDistanceTravelled"));
 		System.out.println("AREA RATIO: " + metrics.get("ratioOfAreas"));

@@ -77,33 +77,12 @@
 			<artifactId>spring-webmvc</artifactId>
 			<version>${org.springframework.version}</version>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.sun.jersey.contribs</groupId> -->
-<!-- 			<artifactId>jersey-spring</artifactId> -->
-<!-- 			<version>${jersey.version}</version> -->
-<!-- 		</dependency> -->
-
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.sun.jersey</groupId> -->
-<!-- 			<artifactId>jersey-server</artifactId> -->
-<!-- 			<version>${jersey.version}</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.sun.jersey</groupId> -->
-<!-- 			<artifactId>jersey-servlet</artifactId> -->
-<!-- 			<version>${jersey.version}</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.sun.jersey</groupId> -->
-<!-- 			<artifactId>jersey-grizzly2</artifactId> -->
-<!-- 			<version>${jersey.version}</version> -->
-<!-- 		</dependency> -->
-  <dependency>
-	<groupId>javax.servlet</groupId>
-	<artifactId>servlet-api</artifactId>
-	<version>2.5</version>
-	<scope>provided</scope>
-  </dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.jbehave</groupId>
 			<artifactId>jbehave-core</artifactId>
@@ -160,10 +139,12 @@
 			<artifactId>gt-shapefile</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-		
-		
-		<!--                -->
-			<dependency>
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 			<version>2.0.0</version>
@@ -193,14 +174,14 @@
 			<artifactId>jackson-core-asl</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
-		<!--                -->
+		<!-- -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlets</artifactId>
 			<version>8.1.8.v20121106</version>
 		</dependency>
-		
-		
+
+
 	</dependencies>
 
 
@@ -225,14 +206,14 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>8.1.8.v20121106</version>
 				<configuration>
-				<webApp>
-					<contextPath>/agent-walkability</contextPath>
-				</webApp>
-                <webAppConfig>
-                  
-                  <defaultsDescriptor>webdefault.xml</defaultsDescriptor>
-                </webAppConfig>
-            </configuration>
+					<webApp>
+						<contextPath>/agent-walkability</contextPath>
+					</webApp>
+					<webAppConfig>
+
+						<defaultsDescriptor>webdefault.xml</defaultsDescriptor>
+					</webAppConfig>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -67,9 +67,6 @@ public final class PathGenerator {
 			try {
 				Node endNode = lineStringGen.getNode(end.getCoordinate());
 				if (endNode != null) {
-					LOGGER.info("Start Node: " + startNode.toString());
-					LOGGER.info("End Node: " + endNode.toString());
-
 					Path shortest = findAStarShortestPath(graph, startNode,
 							endNode);
 					paths.add(shortest);

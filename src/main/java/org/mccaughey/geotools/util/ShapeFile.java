@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Point;
 
-public class ShapeFile {
+public final class ShapeFile {
 
 	private ShapeFile() {
 	}
@@ -43,17 +43,16 @@ public class ShapeFile {
 	static final Logger LOGGER = LoggerFactory.getLogger(ShapeFile.class);
 
 	public static File createShapeFileAndReturnAsZipFile(File geoJsonFile,
-			HttpSession session) throws IOException,
-			NoSuchAuthorityCodeException, FactoryException {
+			HttpSession session) throws IOException, FactoryException {
 
 		SimpleFeatureCollection featureCollection = (SimpleFeatureCollection) readFeatures(geoJsonFile);
-		return createShapeFileAndReturnAsZipFile(geoJsonFile.getName(),
+		return createShapeFileAndReturnAsZipFile(geoJsonFile.getName(), null,
 				featureCollection, session);
 	}
 
 	public static File createShapeFileAndReturnAsZipFile(String fileName,
-			SimpleFeatureCollection featureCollection, HttpSession session)
-			throws IOException, NoSuchAuthorityCodeException, FactoryException {
+			File metricsFile, SimpleFeatureCollection featureCollection,
+			HttpSession session) throws IOException, FactoryException {
 
 		//
 		File tempDir = new File(System.getProperty("java.io.tmpdir"));
@@ -86,7 +85,9 @@ public class ShapeFile {
 
 		File zipfile = TemporaryFileManager.getNew(session, shapefileName,
 				".zip", true);
-
+		if (metricsFile != null) {
+			FileUtils.moveFileToDirectory(metricsFile, zipfolder, false);
+		}
 		Zip zip = new Zip(zipfile, newFile.getParentFile().getAbsolutePath());
 		zip.createZip();
 
@@ -98,8 +99,7 @@ public class ShapeFile {
 
 	private static void featuresExportToShapeFile(SimpleFeatureType type,
 			SimpleFeatureCollection simpleFeatureCollection, File newFile,
-			boolean createSchema) throws IOException,
-			NoSuchAuthorityCodeException, FactoryException {
+			boolean createSchema) throws IOException, FactoryException {
 
 		if (!newFile.exists()) {
 			newFile.createNewFile();

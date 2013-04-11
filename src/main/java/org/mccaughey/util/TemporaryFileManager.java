@@ -17,11 +17,12 @@ public class TemporaryFileManager {
 			throws IOException {
 		return getNew(session, prefix, suffix, false);
 	}
-	public static File getNew(HttpSession session, String prefix, String suffix,boolean doNotUseSessionId)
-			throws IOException {
+
+	public static File getNew(HttpSession session, String prefix,
+			String suffix, boolean doNotUseSessionId) throws IOException {
 		synchronized (session) {
-			File file = File.createTempFile(prefix + "_" + (doNotUseSessionId?"":session.getId())
-					+ "_", suffix);
+			File file = File.createTempFile(prefix + "_"
+					+ (doNotUseSessionId ? "" : session.getId()) + "_", suffix);
 			file.deleteOnExit();
 
 			List<String> infos = _tempfilesInfo.get(session.getId());
@@ -44,7 +45,8 @@ public class TemporaryFileManager {
 			_tempfilesInfo.remove(session.getId());
 		}
 	}
-	public static void registerTempFile(HttpSession session, String absolutePath){
+
+	public static void registerTempFile(HttpSession session, String absolutePath) {
 		synchronized (session) {
 			List<String> infos = _tempfilesInfo.get(session.getId());
 			if (infos == null)
