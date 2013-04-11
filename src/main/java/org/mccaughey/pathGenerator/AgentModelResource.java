@@ -142,8 +142,7 @@ public class AgentModelResource {
 				writer.close();
 				request.getSession().setAttribute(METRICS_LOCATION_ATTRIBUTE,
 						metricsFile.getAbsolutePath());
-				
-
+			
 				//
 				PathWriter.writePathNodes(paths, crs, file);
 				request.getSession().setAttribute(SHAPEFILE_LOCATION_ATTRIBUTE,
