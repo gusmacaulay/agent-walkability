@@ -22,7 +22,7 @@ public final class MetricAnalyser {
 	}
 
 	public static Map<String, Double> calculateMetrics(
-			SimpleFeatureCollection agentPaths, int maxDistance) {
+			SimpleFeatureCollection agentPaths, double maxDistance) {
 		Map<String, Double> metrics = new HashMap<String, Double>();
 		SimpleFeatureCollection destinationFeatures = getDestinationFeatures(agentPaths);
 
@@ -89,7 +89,7 @@ public final class MetricAnalyser {
 		return (double) (totalCrossings / agentDestinations.size());
 	}
 
-	private static Double ratioOfAreas(SimpleFeatureCollection agentDestinations, int maxDistance) {
+	private static Double ratioOfAreas(SimpleFeatureCollection agentDestinations, double maxDistance) {
 		SimpleFeatureIterator iter = agentDestinations.features();
 		Geometry points = null;
 		Geometry convexHull = null;

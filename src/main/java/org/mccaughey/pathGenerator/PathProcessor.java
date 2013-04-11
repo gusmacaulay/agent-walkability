@@ -1,10 +1,5 @@
 package org.mccaughey.pathGenerator;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +7,6 @@ import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.graph.path.Path;
 import org.geotools.graph.structure.Edge;
 import org.geotools.graph.structure.Node;
@@ -30,7 +24,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
-public class PathProcessor {
+public final class PathProcessor {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(PathProcessor.class);
 
@@ -42,7 +36,7 @@ public class PathProcessor {
 	}
 
 	public static SimpleFeatureCollection processPathNodes(List<Path> paths,
-			int stepTime, CoordinateReferenceSystem crs)
+			double stepTime, int maxTime, int intersectionWait, int stepDistance, CoordinateReferenceSystem crs)
 			throws GeneratedOutputEmptyException {
 
 		SimpleFeatureType featureType = createPathFeatureType(crs);
@@ -53,7 +47,8 @@ public class PathProcessor {
 			pathID++;
 			Node currentNode = path.getFirst();
 
-			long walkTime = 0; // The epoch in unix time
+			//Walk time in milliseconds since the epoch (unix time)
+			long walkTime = 0; 
 
 			List<String> unvisited = new ArrayList<String>();
 			for (Edge edge : (List<Edge>) path.getEdges()) {
@@ -62,7 +57,7 @@ public class PathProcessor {
 
 			featuresList = processEdges(unvisited, currentNode,
 					geometryFactory, featureType, walkTime, pathID,
-					featuresList, stepTime);
+					featuresList, stepTime, maxTime, intersectionWait, stepDistance);
 
 		}
 		SimpleFeatureCollection pathFeatures = DataUtilities
@@ -72,21 +67,22 @@ public class PathProcessor {
 
 	private static List<SimpleFeature> processEdges(List<String> unvisited,
 			Node startNode, GeometryFactory geometryFactory,
-			SimpleFeatureType featureType, long walkTime, int pathID,
-			List<SimpleFeature> featuresList, int stepTime) {
+			SimpleFeatureType featureType, long startTime, int pathID,
+			List<SimpleFeature> featuresList, double stepTime, int maxTime, int intersectionWait, int stepDistance) {
 
-		int maxTime = 1200000;
+		
 		
 		LineString line;
 		Node currentNode = startNode;
 		int crossings = 0;
 		int walkDistance = 0;
+		long walkTime = startTime;
 		while ((unvisited.size() > 0)&&(walkTime <= maxTime)) {
 			if (currentNode.getEdges().size() > 0) {
-				int intersectionWait = 0;
+				int crossingWait = 0;
 				if (currentNode.getEdges().size() > 2) {
 					// This is an intersection - therefore delay for crossing
-					intersectionWait = 30000;
+					crossingWait = intersectionWait;
 					crossings++;
 				}
 				for (Edge edge : (List<Edge>) currentNode.getEdges()) {
@@ -100,30 +96,30 @@ public class PathProcessor {
 
 						if (lil.project(pt) == lil.getStartIndex()) {
 							// start coordinate is at start of line
-							for (int index = 0; index < lil.getEndIndex(); index += 25) {
+							for (int index = 0; index < lil.getEndIndex(); index += stepDistance) {
 								Coordinate coordinate = lil.extractPoint(index);
 								Point point = geometryFactory
 										.createPoint(coordinate);
 								SimpleFeature feature = buildTimeFeatureFromGeometry(
 										featureType, point, walkTime,crossings,walkDistance,
 										String.valueOf(pathID));
-								walkDistance += 25; 
-								walkTime += stepTime + intersectionWait;
-								intersectionWait = 0; // only perform wait once
+								walkDistance += stepDistance; 
+								walkTime += stepTime + crossingWait;
+								crossingWait = 0; // only perform wait once
 								featuresList.add(feature);
 							}
 						} else if (lil.project(pt) == lil.getEndIndex()) {
 							// start coordinate is at the end of the line
-							for (int index = (int) lil.getEndIndex(); index >= 0; index -= 25) {
+							for (int index = (int) lil.getEndIndex(); index >= 0; index -= stepDistance) {
 								Coordinate coordinate = lil.extractPoint(index);
 								Point point = geometryFactory
 										.createPoint(coordinate);
 								SimpleFeature feature = buildTimeFeatureFromGeometry(
 										featureType, point, walkTime,crossings,walkDistance,
 										String.valueOf(pathID));
-								walkDistance += 25; 
-								walkTime += stepTime + intersectionWait;
-								intersectionWait = 0; // only perform wait once
+								walkDistance += stepDistance; 
+								walkTime += stepTime + crossingWait;
+								crossingWait = 0; // only perform wait once
 								featuresList.add(feature);
 							}
 						} else {
@@ -132,9 +128,9 @@ public class PathProcessor {
 						unvisited.remove(String.valueOf(edge.getID()));
 
 						Node nextNode = edge.getOtherNode(currentNode);
-						if (nextNode != null)
+						if (nextNode != null) {
 							currentNode = nextNode;
-						else {
+						} else {
 							break;
 						}
 

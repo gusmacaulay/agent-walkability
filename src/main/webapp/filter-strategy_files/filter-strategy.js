@@ -4,7 +4,7 @@ var currentDate;
 // var startDate = new Date(1272736800000); // lower bound of when values
 // var endDate = new Date(1272737100000); // upper value of when values
 var startDate = new Date(0); // lower bound of when values
-var endDate = new Date(1200000); // upper value of when values
+
 var step = 9; // seccods to advance each interval
 var interval = 0.03; // seconds between each step in the animation
 var easting, northing;
@@ -12,6 +12,8 @@ var draw, modify, snap, split, vectors, wfs;
 
 function startAnimation() {
 	// loadPaths();
+	maxTime = document.getElementById('walkingTimeSlider').value * 60 * 1000;
+	var endDate = new Date(maxTime); // upper value of when values
 	if (animationTimer) {
 		stopAnimation(true);
 	}
@@ -49,27 +51,28 @@ function stopAnimation(reset) {
 }
 
 function downloadOutput() {
-	window.open("/agent-walkability/service/agent-paths/downloadGeneratedOutputAzShpZip");
-	
+	window
+			.open("/agent-walkability/service/agent-paths/downloadGeneratedOutputAzShpZip");
+
 }
 function loadPaths() {
-	if (!easting||!northing){
-		$( "#dialog" ).dialog({
-		      modal: true,
-		      buttons: {
-		        Ok: function() {
-		          $( this ).dialog( "close" );
-		        }
-		      }
-		    });
-			return;	
-			
+	if (!easting || !northing) {
+		$("#dialog").dialog({
+			modal : true,
+			buttons : {
+				Ok : function() {
+					$(this).dialog("close");
+				}
+			}
+		});
+		return;
+
 	}
-	document.getElementById('simulation_status').innerHTML="Simulation is running ...";	
-	document.getElementById('play').disabled="disabled";
-	document.getElementById('pause').disabled="disabled";
-	document.getElementById('download').disabled="disabled";
-	
+	document.getElementById('simulation_status').innerHTML = "Simulation is running ...";
+	document.getElementById('play').disabled = "disabled";
+	document.getElementById('pause').disabled = "disabled";
+	document.getElementById('download').disabled = "disabled";
+
 	filter = new OpenLayers.Filter.Comparison({
 		type : OpenLayers.Filter.Comparison.BETWEEN,
 		property : "when",
@@ -129,21 +132,18 @@ function loadPaths() {
 	});
 
 	pathStyle.addRules([ ruleRed, ruleOrange, ruleYellow ]);
-
+	maxTime = document.getElementById('walkingTimeSlider').value * 60 * 1000;
+	intersectionTime = document.getElementById('waitingTimeSlider').value * 1000;
+	walkSpeed = document.getElementById('walkingSpeedSlider').value;
 	var paths = new OpenLayers.Layer.Vector("Paths", {
 		projection : geographic,
 		strategies : [ new OpenLayers.Strategy.Fixed(), filterStrategy ],
 
 		protocol : new OpenLayers.Protocol.HTTP({
-			// url: "paths_wgs84.geojson",
-			// url : "/service/agent-paths/285752.0/5824386.0",
-			 
-			url : "/agent-walkability/service/agent-paths/" + easting + "/" + northing,
-			format : new OpenLayers.Format.GeoJSON(),			 
-			//,
-			//params:{'ff':'dd'}
-			
-			 
+			url : "/agent-walkability/service/agent-paths/" + easting + "/"
+					+ northing + "/" + maxTime + "/" + intersectionTime + "/"
+					+ walkSpeed,
+			format : new OpenLayers.Format.GeoJSON(),
 		}),
 		styleMap : new OpenLayers.StyleMap({
 			"default" : pathStyle
@@ -159,20 +159,24 @@ function loadPaths() {
 		renderers : [ "Canvas", "SVG", "VML" ]
 	});
 
-	paths.events.register("loadend", paths, function(a) {
-		if(!a.response.features||a.response.features.length==0){			 
-			document.getElementById('simulation_status').innerHTML="Generated output is empty";	
-			
-		}else {
-			document.getElementById('simulation_status').innerHTML="Simulation is completed";	
-			document.getElementById('play').disabled="";
-			document.getElementById('pause').disabled="";
-			document.getElementById('download').disabled="";
-		}
-		//
-     });
+	paths.events
+			.register(
+					"loadend",
+					paths,
+					function(a) {
+						if (!a.response.features
+								|| a.response.features.length == 0) {
+							document.getElementById('simulation_status').innerHTML = "Generated output is empty";
 
-	
+						} else {
+							document.getElementById('simulation_status').innerHTML = "Simulation is completed";
+							document.getElementById('play').disabled = "";
+							document.getElementById('pause').disabled = "";
+							document.getElementById('download').disabled = "";
+						}
+						//
+					});
+
 	map.addLayer(paths);
 	// alert("Loaded Paths");
 	// map.setCenter(new OpenLayers.LonLat(144.570412433435773,
@@ -202,51 +206,6 @@ map = new OpenLayers.Map("map", {
 });
 
 var osm = new OpenLayers.Layer.OSM();
-
-// var paths_static = new OpenLayers.Layer.Vector("Paths Buffer", {
-// projection : geographic,
-// strategies: [new OpenLayers.Strategy.BBOX()],
-// //strategies: [new OpenLayers.Strategy.Fixed(),new
-// OpenLayers.Strategy.BBox()],
-// protocol : new OpenLayers.Protocol.HTTP({
-// url : "/paths_buffer_wgs84.geojson",
-// format : new OpenLayers.Format.GeoJSON()
-// }),
-// styleMap : new OpenLayers.StyleMap({
-// "default" : new OpenLayers.Style({
-// graphicName : "circle",
-// pointRadius : 10,
-// fillOpacity : 0.25,
-// fillColor : "#4de800",
-// strokeColor : "#02aa21",
-// strokeWidth : 1
-// })
-// }),
-// renderers : [ "Canvas", "SVG", "VML" ]
-// });
-
-// var roads = new OpenLayers.Layer.Vector("Roads", {
-// projection : geographic,
-// strategies: [new OpenLayers.Strategy.BBOX()],
-// // strategies: [new OpenLayers.Strategy.Fixed(),new
-// // OpenLayers.Strategy.BBox()],
-// protocol : new OpenLayers.Protocol.HTTP({
-// url : "/graph_wgs84.geojson",
-// format : new OpenLayers.Format.GeoJSON()
-// }),
-// styleMap : new OpenLayers.StyleMap({
-// "default" : new OpenLayers.Style({
-// graphicName : "circle",
-// pointRadius : 10,
-// fillOpacity : 0.25,
-// fillColor : "#428beb",
-// strokeColor : "#428beb",
-// strokeWidth : 3
-// })
-// }),
-// renderers : [ "Canvas", "SVG", "VML" ]
-// });
-
 var saveStrategy = new OpenLayers.Strategy.Save();
 
 OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
@@ -485,22 +444,23 @@ function init() {
 
 	map.addLayers([ osm, vectors ])
 	initWFSTools();
-	destinations = new OpenLayers.Layer.WMS("Destinations", "/agent-walkability/geoserver/wms", {
-		LAYERS : 'CSDILA_local:random_destinations',
-		srsName : "EPSG:900913",
-		STYLES : '',
-		format : 'image/png',
-		tiled : true,
-		transparent : true,
-		tilesOrigin : map.maxExtent.left + ',' + map.maxExtent.bottom
-	}, {
-		buffer : 0,
-		displayOutsideMaxExtent : true,
-		reproject : true
-//		yx : {
-//			'EPSG:900913' : false
-//		}
-	});
+	destinations = new OpenLayers.Layer.WMS("Destinations",
+			"/agent-walkability/geoserver/wms", {
+				LAYERS : 'CSDILA_local:random_destinations',
+				srsName : "EPSG:900913",
+				STYLES : '',
+				format : 'image/png',
+				tiled : true,
+				transparent : true,
+				tilesOrigin : map.maxExtent.left + ',' + map.maxExtent.bottom
+			}, {
+				buffer : 0,
+				displayOutsideMaxExtent : true,
+				reproject : true
+			// yx : {
+			// 'EPSG:900913' : false
+			// }
+			});
 	destinations.setIsBaseLayer(false);
 	// estinations.isBaseLayer(false);
 	map.addLayers([ wfs, destinations ])

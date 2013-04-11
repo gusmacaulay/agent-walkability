@@ -119,18 +119,13 @@ public class PathGeneratorSteps extends Embedder {
 
 	@Then("the path/s will have timestamps")
 	public void shortestPathHasTimeStamps() throws NoSuchAuthorityCodeException, FactoryException, GeneratedOutputEmptyException {
-		// System.out.println("Paths: " + paths.size());
-		// for (Path path : paths) {
-		// for (Edge edge : (List<Edge>) path.getEdges()) {
-		// LineString line = (LineString) edge.getObject();
-		// // System.out.println(line.toText());
-		// }
-		// }
-		// // Assert.assertTrue(path != null);n isntall
 		CoordinateReferenceSystem crs = CRS.decode("EPSG:28355");
 		int stepTime = 18000;
+		int maxTime = 1200000;
+		int intersectionWait = 30000;
+		int stepDistance = 25;
 		SimpleFeatureCollection pathFeatures = PathProcessor.processPathNodes(paths,
-				stepTime, crs);
+				stepTime,maxTime,intersectionWait,stepDistance, crs);
 		PathWriter.writePathNodes(pathFeatures, crs,  new File("output.geojson"));
 		int maxDistance = 1600;
 		Map<String,Double> metrics = MetricAnalyser.calculateMetrics(pathFeatures,maxDistance);

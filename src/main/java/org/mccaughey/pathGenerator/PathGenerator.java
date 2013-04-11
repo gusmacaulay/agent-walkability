@@ -34,7 +34,7 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.linearref.LinearLocation;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
 
-public class PathGenerator {
+public final class PathGenerator {
 
 	private static final double GEOMETRY_PRECISION = 100;
 	static final Logger LOGGER = LoggerFactory.getLogger(PathGenerator.class);
@@ -48,9 +48,6 @@ public class PathGenerator {
 	public static List<Path> shortestPaths(SimpleFeatureSource networkSource,
 			Point start, List<Point> destinations) throws IOException,
 			NoSuchAuthorityCodeException, FactoryException {
-
-		// Query query = new Query(LayerMapping.ROAD_SAMPLE_LAYER);
-		// query.setCoordinateSystem(CRS.decode("EPSG:28355")); // FROM
 
 		SimpleFeatureCollection networkSimpleFeatureCollection = networkSource
 				.getFeatures();
@@ -67,7 +64,6 @@ public class PathGenerator {
 
 		List<Path> paths = new ArrayList<Path>();
 		for (Point end : destinations) {
-			// LOGGER.info("calculating path for this point ...");
 			try {
 				Node endNode = lineStringGen.getNode(end.getCoordinate());
 				if (endNode != null) {

@@ -49,9 +49,10 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 @RequestMapping("/agent-paths")
 public class AgentModelResource {
 
+	private static final int MILLISECONDS = 1000;
 	private static final String ZIP_FILE_LOCATION_ATTRIBUTE = "Generated_ZipFile_Location";
-	
 	private static final String SHAPEFILE_LOCATION_ATTRIBUTE = "Generated_File_Location";
+	private static final int STEP_DISTANCE = 25;
 
 	@Autowired
 	private WFSDataStoreFactoryImpl wfsDataStoreFactoryImpl;
@@ -59,17 +60,21 @@ public class AgentModelResource {
 	static final Logger LOGGER = LoggerFactory
 			.getLogger(AgentModelResource.class);
 
-	@RequestMapping(value = "/{easting}/{northing}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{easting}/{northing}/{maxTime}/{intersectionWait}/{walkSpeed}", method = RequestMethod.GET)
 	public void getPaths(HttpServletRequest request,
 			HttpServletResponse response, @PathVariable String easting,
-			@PathVariable String northing) throws IOException,
-			NoSuchAuthorityCodeException, FactoryException,
+			@PathVariable String northing, @PathVariable int maxTime,
+			@PathVariable int intersectionWait, @PathVariable double walkSpeed)
+			throws IOException, NoSuchAuthorityCodeException, FactoryException,
 			MismatchedDimensionException, TransformException {
 
-		
-		int stepTime = 18000;
-		int maxDistance = 1600;
-		
+//		int maxTime = 1200000;
+//		int intersectionWait = 30000;
+//		double walkSpeed = 1.33;
+
+		double stepTime = (STEP_DISTANCE / walkSpeed) * MILLISECONDS;
+		double maxDistance = (maxTime * walkSpeed) / MILLISECONDS;
+
 		ApplicationContext ctx = WebApplicationContextUtils
 				.getWebApplicationContext(request.getSession()
 						.getServletContext());
@@ -111,14 +116,19 @@ public class AgentModelResource {
 			File file = TemporaryFileManager.getNew(request.getSession(),
 					"all_path_nodes_", ".json");
 			try {
+
 				CoordinateReferenceSystem crs = CRS.decode("EPSG:28355");
+
 				SimpleFeatureCollection paths = PathProcessor.processPathNodes(
 						PathGenerator.shortestPaths(networkSource,
-								targetGeometry, destinations), stepTime, crs);
+								targetGeometry, destinations), stepTime,
+						maxTime, intersectionWait, STEP_DISTANCE, crs);
 				PathWriter.writePathNodes(paths, crs, file);
-				
-				Map<String,Double> metrics = MetricAnalyser.calculateMetrics(paths,maxDistance);
-				LOGGER.info("AVERAGE CROSSINGS: {}", metrics.get("meanCrossings"));
+
+				Map<String, Double> metrics = MetricAnalyser.calculateMetrics(
+						paths, maxDistance);
+				LOGGER.info("AVERAGE CROSSINGS: {}",
+						metrics.get("meanCrossings"));
 				//
 				request.getSession().setAttribute(SHAPEFILE_LOCATION_ATTRIBUTE,
 						file.getAbsolutePath());
