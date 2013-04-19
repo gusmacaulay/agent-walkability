@@ -1,12 +1,20 @@
 package org.mccaughey.pathGenerator;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.graph.build.line.LineStringGraphGenerator;
 import org.geotools.graph.path.AStarShortestPathFinder;
 import org.geotools.graph.path.Path;
@@ -15,8 +23,10 @@ import org.geotools.graph.structure.Node;
 import org.geotools.graph.traverse.standard.AStarIterator.AStarFunctions;
 import org.geotools.graph.traverse.standard.AStarIterator.AStarNode;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +46,11 @@ import com.vividsolutions.jts.linearref.LocationIndexedLine;
 
 public final class PathGenerator {
 
+	// LINE_DENSITY -> how many units (metres hopefully) between each point
+	private static final double LINE_DENSITY = 0.1;
 	private static final double GEOMETRY_PRECISION = 100;
 	static final Logger LOGGER = LoggerFactory.getLogger(PathGenerator.class);
-	private static final Double MAX_SNAP_DISTANCE = 5000.0;
+	private static final Double MAX_SNAP_DISTANCE = 300.0;
 	private static PrecisionModel precision = new PrecisionModel(
 			GEOMETRY_PRECISION);
 
@@ -53,19 +65,22 @@ public final class PathGenerator {
 				.getFeatures();
 		List<LineString> lines = nodeIntersections(networkSimpleFeatureCollection);
 
-		LOGGER.info("FEATURES: {}", networkSimpleFeatureCollection.size());
+		//
+		// LOGGER.info("FEATURES: {}", networkSimpleFeatureCollection.size());
 		// Build a graph with all the destinations connected
 		LineStringGraphGenerator lineStringGen = createGraphWithAdditionalNodes(
 				lines, start, destinations);
 		Graph graph = lineStringGen.getGraph();
-		LOGGER.info("GRAPH: " + graph);
-
+		
+		//LOGGER.info("GRAPH: " + graph);
+		LOGGER.info("Point: {}", start.toText());
 		Node startNode = lineStringGen.getNode(start.getCoordinate());
-
+		LOGGER.info("Start Node {}", startNode.toString());
 		List<Path> paths = new ArrayList<Path>();
 		for (Point end : destinations) {
 			try {
 				Node endNode = lineStringGen.getNode(end.getCoordinate());
+				//LOGGER.info("End Node: {}",  endNode.toString());
 				if (endNode != null) {
 					Path shortest = findAStarShortestPath(graph, startNode,
 							endNode);
@@ -73,19 +88,81 @@ public final class PathGenerator {
 
 				}
 			} catch (Exception e) {
-				LOGGER.error("Something bad happened, ignoring"
-						+ e.getMessage());
+//				 LOGGER.error("Something bad happened, ignoring "
+//				 + e.getMessage());
 			}
 		}
 		LOGGER.info("Created {} paths", paths.size());
 		return paths;
 	}
 
+	private static void writeLines(List<LineString> lines) {
+//		FeatureJSON gjson = new FeatureJSON();
+//		OutputStream os;
+//		int id = 0;
+//		try {
+//			File file = new File("lines.geojson");
+//			os = new FileOutputStream(file);
+//			try {
+//				List<SimpleFeature> features = new ArrayList();
+//				for (LineString line : lines) {
+//					id++;
+//					features.add(createFeature(line, id));
+//				}
+//				gjson.writeFeatureCollection(
+//						DataUtilities.collection(features), os);
+//			} finally {
+//				os.close();
+//			}
+//		} catch (FileNotFoundException e1) {
+//			LOGGER.error("Failed to write feature collection "
+//					+ e1.getMessage());
+//		} catch (IOException e) {
+//			LOGGER.error("Failed to write feature collection " + e.getMessage());
+//		}
+	}
+
+	private static SimpleFeature createFeature(LineString line, int id) {
+		SimpleFeatureType ft = createFeatureType(null);
+
+		return buildFeatureFromGeometry(ft, line, "line" + id);
+	}
+
+	private static SimpleFeature buildFeatureFromGeometry(
+			SimpleFeatureType featureType, Geometry geom, String featureID) {
+		SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
+		stb.init(featureType);
+		SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(featureType);
+		sfb.add(geom);
+		sfb.add(featureID);
+		return sfb.buildFeature(null);
+	}
+
+	private static SimpleFeatureType createFeatureType(
+			CoordinateReferenceSystem crs) {
+
+		SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
+		builder.setName("Buffer");
+		if (crs != null) {
+			builder.setCRS(crs); // <- Coordinate reference system
+		}
+
+		// add attributes in order
+		builder.add("geometry", LineString.class);
+		builder.add("feature_id", String.class);
+
+		// build the type
+		SimpleFeatureType pathType = builder.buildFeatureType();
+
+		return pathType;
+	}
+
 	private static LineStringGraphGenerator createGraphWithAdditionalNodes(
-			List<LineString> lines, Point startingPoint,
+			List<LineString> sourceLines, Point startingPoint,
 			List<Point> destinations) throws IOException {
 
-		LocationIndexedLine startConnectedLine = findNearestEdgeLine(lines,
+		List<LineString> lines = sourceLines;
+		LocationIndexedLine startConnectedLine = findNearestEdgeLine(sourceLines,
 				MAX_SNAP_DISTANCE, startingPoint);
 
 		if (startConnectedLine != null) {
@@ -93,13 +170,14 @@ public final class PathGenerator {
 		}
 
 		for (Point endPoint : destinations) {
-			LocationIndexedLine endConnectedLine = findNearestEdgeLine(lines,
+			LocationIndexedLine endConnectedLine = findNearestEdgeLine(sourceLines,
 					MAX_SNAP_DISTANCE, endPoint);
 			if (endConnectedLine != null) {
 				addConnectingLine(endPoint, lines, endConnectedLine);
 			}
 		}
 		nodeIntersections(lines);
+		writeLines(lines);
 
 		// create a linear graph generator
 		LineStringGraphGenerator lineStringGen = new LineStringGraphGenerator();
@@ -233,30 +311,63 @@ public final class PathGenerator {
 	private static List<LineString> nodeIntersections(List<LineString> rawLines) {
 		List<LineString> lines = new ArrayList<LineString>();
 
-		for (LineString line : rawLines) {
-			for (int i = 0; i < line.getNumGeometries(); i++) {
-				lines.add((LineString) line.getGeometryN(i));
-			}
-		}
+		// for (LineString line : rawLines) {
+		// for (int i = 0; i < line.getNumGeometries(); i++) {
+		// lines.add((LineString) line.getGeometryN(i));
+		// }
+		// }
 
 		GeometryFactory geomFactory = new GeometryFactory(precision);
-		Geometry grandMls = geomFactory.buildGeometry(lines);
+		Geometry grandMls = geomFactory.buildGeometry(rawLines);
 		Point mlsPt = geomFactory.createPoint(grandMls.getCoordinate());
 		try {
+			if (!(grandMls.isValid())) {
+				LOGGER.info("lines not valid?");
+			}
+			if (!(mlsPt.isValid())) {
+				LOGGER.info("Point not valid?");
+			}
+			List<LineString> unUnioned = rawLines;
+			int loopCount = 0;
+			int giveUp = 10*rawLines.size();
+//			Geometry nodedLines = null;
+//			while ((unUnioned.size() > 0) && (loopCount < giveUp)) {
+//				// for (int i = 0; i < unUnioned.size(); i++) {
+//				if (nodedLines == null) {
+//					nodedLines = unUnioned.get(0);
+//					unUnioned.remove(0);
+//				} else {
+//					try {
+//						nodedLines = nodedLines.union(unUnioned.get(0));
+//						unUnioned.remove(0);
+//					} catch (Exception e) {
+//						LOGGER.error("UNION ERROR {} ", e.getMessage());
+//					}
+//				}
+//				loopCount++;
+//				// }
+//			}
+			//nodedLines = nodedLines.union(mlsPt);
 			Geometry nodedLines = grandMls.union(mlsPt);
-
+	
 			lines.clear();
 
 			for (int i = 0, n = nodedLines.getNumGeometries(); i < n; i++) {
 				Geometry g = nodedLines.getGeometryN(i);
-				if (g instanceof LineString) {
-					g = (LineString) Densifier.densify(g, 5.0);
-					lines.add((LineString) g);
+				if (g.isValid()) {
+					if (g instanceof LineString) {
+						g = (LineString) Densifier.densify(g, LINE_DENSITY);
+						lines.add((LineString) g);
+					}
+				} else {
+					LOGGER.info("Found invalid geometry in network, ignoring");
 				}
 			}
 		} catch (TopologyException te) {
-			LOGGER.info("Failed to node non-noded intersection, ugh");
+		//	te.printStackTrace();
+			LOGGER.info("Failure while noding network, {}", te.getMessage());
 		}
+
 		return lines;
 	}
 

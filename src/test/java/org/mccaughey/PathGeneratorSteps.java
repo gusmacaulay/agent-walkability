@@ -58,7 +58,9 @@ public class PathGeneratorSteps extends Embedder {
 
 		// File networkShapeFile = new
 		// File(getClass().getResource("/melton_roads_sample.shp").getFile());
-		File networkShapeFile = new File(getClass().getResource("/graph.shp")
+//		File networkShapeFile = new File(getClass().getResource("/graph.shp")
+//				.getFile());
+		File networkShapeFile = new File(getClass().getResource("/melton_roads_sample.shp")
 				.getFile());
 		FileDataStore networkDataStore = FileDataStoreFinder
 				.getDataStore(networkShapeFile);
@@ -69,8 +71,8 @@ public class PathGeneratorSteps extends Embedder {
 
 	@Given("a startpoint")
 	public void aStartPoint() {
-		double easting = 285752.0;
-		double northing = 5824386.0;
+		double easting = 285129; //285752.0;
+		double northing = 5825244; //5824386.0;
 		start = geometryFactory.createPoint(new Coordinate(easting, northing));
 	}
 
