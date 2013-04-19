@@ -96,32 +96,6 @@ public final class PathGenerator {
 		return paths;
 	}
 
-	private static void writeLines(List<LineString> lines) {
-//		FeatureJSON gjson = new FeatureJSON();
-//		OutputStream os;
-//		int id = 0;
-//		try {
-//			File file = new File("lines.geojson");
-//			os = new FileOutputStream(file);
-//			try {
-//				List<SimpleFeature> features = new ArrayList();
-//				for (LineString line : lines) {
-//					id++;
-//					features.add(createFeature(line, id));
-//				}
-//				gjson.writeFeatureCollection(
-//						DataUtilities.collection(features), os);
-//			} finally {
-//				os.close();
-//			}
-//		} catch (FileNotFoundException e1) {
-//			LOGGER.error("Failed to write feature collection "
-//					+ e1.getMessage());
-//		} catch (IOException e) {
-//			LOGGER.error("Failed to write feature collection " + e.getMessage());
-//		}
-	}
-
 	private static SimpleFeature createFeature(LineString line, int id) {
 		SimpleFeatureType ft = createFeatureType(null);
 
@@ -177,7 +151,6 @@ public final class PathGenerator {
 			}
 		}
 		nodeIntersections(lines);
-		writeLines(lines);
 
 		// create a linear graph generator
 		LineStringGraphGenerator lineStringGen = new LineStringGraphGenerator();
