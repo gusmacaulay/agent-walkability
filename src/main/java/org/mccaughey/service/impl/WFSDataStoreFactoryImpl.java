@@ -59,6 +59,7 @@ public class WFSDataStoreFactoryImpl implements DataStoreFactory {
 					connectionsInfo.getGeoserverPassword());
 			dataStoreParams.put(WFSDataStoreFactory.TIMEOUT.key, new Integer(
 					18000000));
+			dataStoreParams.put("WFSDataStoreFactory:WFS_STRATEGY","geoserver");
 			dataStoreCSDILA = DataStoreFinder.getDataStore(dataStoreParams);
 		}
 		return dataStoreCSDILA;

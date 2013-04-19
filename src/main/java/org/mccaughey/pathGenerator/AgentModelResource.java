@@ -123,7 +123,7 @@ public class AgentModelResource {
 
 				SimpleFeatureCollection paths = PathProcessor.processPathNodes(
 						PathGenerator.shortestPaths(networkSource,
-								targetGeometry, destinations), stepTime,
+								targetGeometry, destinations,maxDistance), stepTime,
 						maxTime, intersectionWait, STEP_DISTANCE, crs);
 
 				Map<String, String> metrics = MetricAnalyser.calculateMetrics(
